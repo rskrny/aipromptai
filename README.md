@@ -1,37 +1,31 @@
-# AI Prompt Enhancer
+# AI Software Factory
 
-This is a simple Streamlit application that takes a user's simple prompt and "enhances" it using an AI model (simulated in the template) to be better suited for AI coding assistants.
+This is a sophisticated AI-powered "Software Factory" that iteratively builds, deploys, and refines web applications based on user prompts.
 
-## Setup
+## Features
+- **Prompter AI**: Refines user requests into technical specs.
+- **Coder AI**: Generates Flask + TailwindCSS applications.
+- **Visual Feedback**: Uses Playwright to take screenshots of the running app.
+- **Self-Correction**: The AI critiques its own work based on the screenshots and iterates.
+
+## Setup (GitHub Codespaces)
+1. Open this repo in GitHub Codespaces.
+2. The `.devcontainer` configuration will automatically install all dependencies.
+3. Run the app:
+   ```bash
+   streamlit run app.py
+   ```
+
+## Setup (Local)
+*Note: Local setup on Windows is complex due to process management. Linux/WSL is recommended.*
 
 1.  **Install Python**: Ensure you have Python installed.
-2.  **Create a Virtual Environment** (optional but recommended):
-    ```bash
-    python -m venv venv
-    # Windows
-    .\venv\Scripts\activate
-    # Mac/Linux
-    source venv/bin/activate
-    ```
-3.  **Install Dependencies**:
+2.  **Install Dependencies**:
     ```bash
     pip install -r requirements.txt
+    playwright install
     ```
-
-## Configuration
-
-1.  Rename `.env.example` to `.env`.
-2.  Add your OpenAI API Key (or other provider) to the `.env` file.
-3.  **Important**: You need to uncomment the OpenAI code in `app.py` and implement the actual API call to make it work with a real LLM.
-
-## Running the App
-
-```bash
-streamlit run app.py
-```
-
-## How it works
-
-1.  Type a prompt in the chat input.
-2.  The `enhance_prompt` function processes the input.
-3.  The enhanced prompt is displayed in the chat.
+3.  **Run**:
+    ```bash
+    streamlit run app.py
+    ```
