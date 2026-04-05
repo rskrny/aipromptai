@@ -1,60 +1,57 @@
-# HelloTalk API Endpoints
+# HelloTalk API & Technical Infrastructure
 
-Discovered endpoints from traffic analysis. This is a living document — update as new endpoints are found.
+## What We Know
 
-## Base URLs
+HelloTalk does **not** have a public API. There's no official documentation. Their GitHub organization (github.com/hellotalk) has zero public repos. This means all endpoint details must come from traffic capture.
 
-| Environment | URL |
-|---|---|
-| API | `https://api.hellotalk.com` (TBD — confirm via traffic capture) |
-| CDN | TBD |
-| WebSocket | TBD |
+## Infrastructure (Confirmed)
 
-## Authentication
+- **API Gateway**: Apache APISIX (built on Nginx + LuaJIT / OpenResty)
+- **Message serialization**: Protocol Buffers — requests/responses use protobuf, converted to JSON at the gateway
+- **Rate limiting**: Implemented at the gateway level using `resty.limit.req`
+- **Web client**: `web.hellotalk.com` — this is the easiest way to see API calls (just open browser DevTools > Network tab)
+- **WebSocket**: Used for real-time IM, with OpenResty handling protocol conversion
 
-- **Method**: TBD (likely JWT or session token)
-- **Login flow**: TBD
-- **Token refresh**: TBD
+## How to Discover Endpoints
 
-## Endpoints
+### Easiest Method: Browser DevTools on web.hellotalk.com
+1. Go to web.hellotalk.com and log in
+2. Open browser DevTools (F12) > Network tab
+3. Use the app normally — browse discovery, send messages, view moments
+4. Each action shows the actual API calls, URLs, headers, and response bodies
+5. Export as HAR file for analysis
 
-### User / Profile
+### Mobile Method (Advanced)
+The mobile app likely uses **certificate pinning**, which blocks standard proxy tools. To capture mobile traffic you'd need:
+- A rooted Android device
+- Frida (runtime hooking tool) to bypass cert pinning
+- mitmproxy to capture the traffic
+- This is significantly harder than the browser method
 
-| Method | Path | Description | Notes |
-|---|---|---|---|
-| GET | `/user/profile` | Fetch own profile | TBD |
-| PUT | `/user/profile` | Update profile | TBD |
-| GET | `/user/{id}` | Fetch another user's profile | TBD |
+### Auto-Generate API Docs
+Once you have captured traffic (HAR or .mitm files), use **mitmproxy2swagger** (github.com/alufers/mitmproxy2swagger) to auto-generate an OpenAPI spec.
 
-### Discovery / Matching
+## Known Base URLs
 
-| Method | Path | Description | Notes |
-|---|---|---|---|
-| GET | `/discovery` | Get partner suggestions | TBD — params for language, location, filters? |
-| GET | `/search` | Search for users | TBD |
+| Purpose | URL | Status |
+|---|---|---|
+| Web client | `web.hellotalk.com` | Confirmed |
+| Creator portal | `creators.hellotalk.com` | Confirmed |
+| Main site | `www.hellotalk.com` | Confirmed |
 
-### Messaging
+Actual API base URL (e.g., `api.hellotalk.com` or similar) needs to be confirmed via traffic capture.
 
-| Method | Path | Description | Notes |
-|---|---|---|---|
-| GET | `/conversations` | List conversations | TBD |
-| POST | `/messages` | Send a message | TBD |
+## Community Clone Projects (for reference)
 
-### Moments (Social Feed)
+These aren't the real API, but show what the data model probably looks like:
+- **francislainy/hellotalk** on GitHub — Spring Boot API clone with TDD/Pact tests
+- **leejh3224/react-native-hello-talk** — React Native clone using Firebase
 
-| Method | Path | Description | Notes |
-|---|---|---|---|
-| GET | `/moments` | Fetch moments feed | TBD |
-| POST | `/moments` | Create a moment | TBD |
-| POST | `/moments/{id}/like` | Like a moment | TBD |
-| POST | `/moments/{id}/comment` | Comment on a moment | TBD |
+## Next Steps
 
-### Corrections
-
-| Method | Path | Description | Notes |
-|---|---|---|---|
-| POST | `/corrections` | Submit a correction | TBD |
-
----
-
-*Fill in by running `python scripts/parse-traffic.py` against captured traffic.*
+To map the real API, the simplest approach is:
+1. Open `web.hellotalk.com` in Chrome
+2. Open DevTools > Network tab
+3. Use the app (browse partners, send messages, post moments)
+4. Note the actual endpoint URLs, auth headers, and request/response formats
+5. Document findings here
