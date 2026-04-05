@@ -1,6 +1,23 @@
+# Captures and sensitive data
+captures/
+*.har
+*.pcap
+*.mitm
+
+# Decompiled APKs
+apk/
+*.apk
+*.dex
+
+# Python
 __pycache__/
 *.pyc
+.venv/
+venv/
+
+# Environment
 .env
-workspace/
-screenshot.png
-.streamlit/
+
+# OS
+.DS_Store
+Thumbs.db
