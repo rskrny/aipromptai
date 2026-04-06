@@ -4,6 +4,100 @@ Chronological log of every research finding. Newest entries at the top.
 
 ---
 
+## 2026-04-06 — MOBILE API ENCRYPTION FULLY CRACKED
+
+### Encryption Scheme (Complete)
+- **Key Exchange**: X25519 (Curve25519) — NOT P-256/SM2
+- **Library**: Google Tink (`com.google.crypto.tink.subtle.X25519`)
+- **AES Cipher**: AES-256-ECB with PKCS7 padding (weakest possible AES mode)
+- **Response compression**: gzip after encryption
+- **Header format**: `x-ht-pub` = server_pub_hex (32B) + client_pub_hex (32B) = 128 hex chars
+- **Server pub key**: `f684f611b895a5d3abc124a20ca2dfd397662318cfd4fd74b80aba478c17ca68`
+- **Config source**: Server key from `WnsConfigManager.readAsString("pub")`
+- **Anti-cheat SDK**: NetEase HTProtect (`com.netease.htprotect`) wraps the native crypto in `libNetHTProtect.so`
+
+### Discovery Results — COMPLETE INVISIBILITY CONFIRMED
+- Scanned all 33 pages (491 users) of discovery for Chinese learners near Hana, Hawaii
+- **Account 98755150 (Ryan) is NOT in ANY page** — completely excluded from discovery
+- Other users' rank_scores range 5,000–33,999 (avg 15,573)
+- Rank scoring factors: `head_beauty`, `hobby`, `is_learn_native_lang`, `real_avatar`, `self_introduction`, `sex_match`
+- Top user has rank_score=33999 with beauty_score=0.71
+
+### What We Can Now Access
+- Discovery/recommend feed (all users, their profiles, rank scores, locations)
+- Nearby user count and locations
+- Full user profile data for any user in discovery
+- Any encrypted endpoint that uses GET params
+
+### What We Still Can't Do (encrypted POST body format unknown)
+- Exposure records (POST body rejected as "invalid req body")
+- Boost trigger (params still wrong)
+- Profile modification endpoints not found
+
+## 2026-04-06 — API Probe Results & Encryption Key Format Discovery
+
+### API Probe (19 endpoints tested with live auth token)
+
+**Working unencrypted endpoints:**
+- `free_recommend_status` — needs ALL fields as integers. Returns `remain_times: 0` (depleted)
+- `virtual_product/list` — returns full boost product catalog with pricing
+- `get_user_langs` — returns learning languages (lang 2=Chinese, lang 13=temp)
+- `post_recommend_btn` — exists (200 status) but params unknown, always "params is invalid"
+
+**Require encryption (400 "missing or malformed encryption public key"):**
+- `translate_config`, `moments_latest`, `exposure_record`, `moment_tab_info`, `nearby_count`
+- `/go_user_search/v2/recommend` — THE discovery endpoint. Exists but encrypted.
+
+**All speculative endpoints (profile, trust, visibility, etc.) — 404**
+
+### Boost Product System (Fully Mapped)
+
+Two boost types exist:
+- **virtual_type 6**: Cheaper (159 coins/500 impressions)
+- **virtual_type 14**: Standard (299 coins/500 impressions)
+
+Products (type 14): id=19 (500 freq, 299 coins), id=18 (1000 freq, 598), id=20 (2000 freq, 1196), id=21 (3000 freq, 1794)
+
+Account state: `remain_times: 0`, `total_remain_times: 0`, `expose_state: 0`, `vip_plus_privilege_num: 0`
+Labels cost 15 coins each (interest + occupation).
+
+### Encryption Key Format Discovery (CRITICAL)
+
+**The `x-ht-pub` header accepts exactly 128 hex characters (64 bytes) = two 32-byte coordinates (x,y).**
+
+- Anything other than 128 hex chars → "missing or **malformed**"
+- Exactly 128 hex chars → "**invalid** encryption public key"
+- Random 64 bytes → "invalid" (fails point-on-curve check)
+- Valid P-256 points → "invalid" (wrong curve)
+- Valid SM2 points → "invalid" (wrong curve)
+- Valid secp256k1 points → "invalid" (wrong curve)
+
+**Conclusion: HelloTalk uses a custom or uncommon 256-bit elliptic curve.** Not P-256, not SM2, not secp256k1. Possibly a custom curve or an obscure standard curve. The key format is raw xy coordinates in hex, no 04 prefix.
+
+### Old APK Version Downgrade — FAILED
+
+Tested 19 User-Agent versions (iOS 2.6.6 through 6.3.0, Android 2.6.6 through 6.3.0). **All versions get the same encryption requirement.** The server enforces encryption regardless of reported app version. Downgrade attack is not viable.
+
+### Service Discovery
+
+Only confirmed live unencrypted services:
+- `/virtual_product/v1/` — boost products, status
+- `/go_user_search/v1/go_user_info/` — only `get_user_langs` found
+- `/im/v1/` — catch-all (returns 400/405 for everything, not a real API)
+- `/store/v1/` — returns HTML, not an API
+
+### Key Intelligence from Research
+
+1. **No public reverse engineering of HelloTalk encryption exists anywhere** — we're first
+2. **HelloTalk uses Apache APISIX + OpenResty** as API gateway
+3. **Tencent Mars XLOG** for logging (AES-128-CBC encrypted logs)
+4. **PandaOpenSource/HellotalkTools** — XLOG decryptor (AES-128-CBC, PKCS7)
+5. **izr8809/hellotalk-automation** — working web.hellotalk.com Playwright bot (DOM-based messaging)
+6. **Old APKs available** on APKMirror back to v2.6.6 (2018) — useful for JADX decompilation
+7. **Web client architecture**: WebSocket + OpenResty for IM, separate REST API
+
+---
+
 ## 2026-04-06 — Web Client (web.hellotalk.com) JS Encryption Investigation
 
 ### Objective

@@ -54,3 +54,29 @@ Record of every decision made and the reasoning behind it.
 
 **Decision**: Focus on the `post_recommend_btn` endpoint as a potential free boost trigger.
 **Reasoning**: We found `remain_times: 0` on the free boost system. The `post_recommend_btn` endpoint exists — it might trigger a boost action or reveal how to get more boosts. This is testable through Proxyman observation.
+
+---
+
+## 2026-04-06 — ENCRYPTION CRACKED + ROOT CAUSE CONFIRMED
+
+**Decision**: Fully reverse-engineer the mobile API encryption.
+**Reasoning**: Behavioral optimization is pointless if the account is hard-locked. We needed to see what the server actually thinks about this account. Cracked X25519 + AES-256-ECB encryption scheme by: (1) decompiling APK with JADX, (2) finding SecretDataModel.java which revealed X25519 key exchange, (3) getting server public key from Proxyman x-ht-pub header, (4) computing shared secret and decrypting responses.
+
+**Decision**: Confirmed root cause is profile lock + search index exclusion (error 6000).
+**Reasoning**: API returns `"Get Search User Plan Failed"` (code 6000) when asked to index this account for discovery. The app shows "system maintenance" profile lock message. Scanned all 491 discovery users — account is completely absent. This is a server-side admin restriction, not a ranking or settings issue.
+
+**Decision**: Reversed earlier decision — now pursuing new account in parallel.
+**Reasoning**: The profile lock is an admin-level server restriction that cannot be cleared via API. Only HelloTalk support can remove it. While waiting for support response, a new account with optimized profile (using our knowledge of the ranking formula) can achieve immediate visibility. User created new account with username u_sam749.
+
+**Decision**: Email HelloTalk support with technical evidence.
+**Reasoning**: A support request that demonstrates specific knowledge of the restriction (error 6000, profile lock, search index exclusion) gets escalated faster than a generic complaint. Drafted email referencing account ID, follower count, and threatening App Store complaint about deceptive visibility boost sales to secretly banned users.
+
+---
+
+## 2026-04-06 — New Account Strategy
+
+**Decision**: Create new account on different phone with different credentials.
+**Reasoning**: Old account profile lock is server-side and cannot be API-manipulated. New account starts clean with no restrictions. Using knowledge of rank_score formula (max 33,999) to optimize from day 1. Different phone minimizes risk of device-level account linking.
+
+**Decision**: Need new account's user ID before we can monitor/optimize it.
+**Reasoning**: The HelloTalk app doesn't display the numeric user ID in an obvious place. Need to capture it via Proxyman/mitmproxy traffic interception from the second phone's HelloTalk requests. This is the blocker for next session.
