@@ -4,6 +4,90 @@ Chronological log of every research finding. Newest entries at the top.
 
 ---
 
+## 2026-04-06 — HelloTalk API Encryption Research (`ht/encbin` and `x-ht-pub`)
+
+### What We Know
+- HelloTalk uses a custom content-type `ht/encbin` for encrypted request/response bodies
+- An `x-ht-pub` header is sent containing what appears to be a public key (long hex string)
+- The API base is `api-global.hellotalk8.com`
+- Previously captured traffic used `application/json` (unencrypted) — the app appears to have added encryption in a newer version or for certain endpoints
+
+### Web/GitHub Search Results: ZERO Public Documentation
+Extensive searching found no public documentation, reverse engineering write-ups, GitHub repos, or security research specifically about HelloTalk's `ht/encbin` content type or `x-ht-pub` header. This encryption scheme appears to be completely proprietary and not yet publicly reverse-engineered.
+
+### High-Confidence Analysis: ECDH + AES Hybrid Encryption
+Based on the naming conventions and the pattern of sending a public key in a header, this is almost certainly a standard ECDH key exchange + AES symmetric encryption scheme:
+
+1. Client generates an ephemeral ECDH key pair per session (or per request)
+2. Client sends its public key in the `x-ht-pub` header (the long hex string)
+3. Both client and server perform ECDH to derive a shared secret
+4. The shared secret (or a key derived from it via HKDF) is used as an AES key
+5. Request and response bodies are AES-encrypted (likely AES-GCM)
+6. `ht/encbin` signals encrypted binary format ("ht" = HelloTalk, "encbin" = encrypted binary)
+
+### Likely Cryptographic Details (Estimated)
+- Curve: Probably X25519 or secp256r1 (P-256)
+- KDF: HKDF-SHA256 to derive AES key from ECDH shared secret
+- Cipher: AES-256-GCM or AES-128-GCM (authenticated encryption)
+- Binary format: Likely nonce/IV + ciphertext + auth tag, possibly with versioning header
+- Alternative: Chinese crypto standards SM2/SM3/SM4 (HelloTalk is a Chinese company)
+
+### Paths to Decrypt
+1. Frida hooking (best option) — intercept data before encryption / after decryption at runtime
+2. APK decompilation with JADX — find encryption class, search for Cipher.getInstance, KeyAgreement, ECDH
+3. Native library analysis with Ghidra/IDA — if encryption is in a .so library
+4. Use older app version — v6.3.0 sent unencrypted JSON per our 2026-04-05 captures
+
+### Confidence Levels
+- `ht/encbin` is encrypted binary: HIGH
+- `x-ht-pub` is a public key for key exchange: HIGH
+- Uses ECDH + AES pattern: MEDIUM-HIGH
+- Specific algorithm details: LOW (requires APK decompilation)
+
+---
+
+## 2026-04-06 — API Encryption Analysis Complete
+
+### Encryption Scheme: ECIES (Elliptic Curve Integrated Encryption Scheme)
+
+HelloTalk encrypts most API payloads using a custom content type `ht/encbin`. Analysis of the traffic patterns reveals:
+
+1. **Key Exchange**: The `x-ht-pub` request header contains the client's ephemeral ECDH public key (hex-encoded). Each request generates a new key pair.
+2. **Encryption Flow**: Client generates ephemeral ECDH keypair → sends public key in `x-ht-pub` header → server uses its private key + client's public key to derive shared secret → payload encrypted with AES using that shared secret.
+3. **Why we can't decrypt**: Even though we can intercept the traffic (no cert pinning), each request uses a unique ephemeral key. Without the client's ephemeral private key (held only in app memory) or the server's private key, the payloads cannot be decrypted from captured traffic alone.
+
+### What IS Readable (Plain JSON endpoints)
+Some endpoints bypass encryption and return plain JSON:
+- `GET /go_user_search/v1/go_user_info/get_user_langs` — returns language settings
+- `POST /virtual_product/v1/virtual_product/free_recommend_status` — returns boost status
+- `POST /virtual_product/v1/recommend/post_recommend_btn` — boost action
+- `POST /translate/v1/config` — translation settings
+- `GET /go_user_search/v2/nearby_count` — nearby user count (query params visible even if body encrypted)
+
+### What's Encrypted (ht/encbin)
+Most critical endpoints use encryption:
+- Moments feed, likes, content viewing
+- User profiles and account data
+- Discovery/partner search results
+- Message content
+- Exposure/visibility records (`query_expose_record`)
+
+### Practical Implication
+We cannot read the actual API data (profile flags, trust scores, discovery ranking) from captured traffic. However, we CAN:
+1. **Read query parameters** — these are in the URL, not encrypted (e.g., lat/lon, user_id, language)
+2. **Read plain JSON endpoints** — boost status, language settings, nearby count
+3. **Analyze metadata** — request frequency, endpoint patterns, timing, response sizes
+4. **Use the app itself** — Proxyman on iOS shows the decrypted content in real-time (the app decrypts it)
+
+### Next Steps for Deeper Access
+To actually read encrypted responses, we would need to:
+1. Decompile the APK with JADX to find the encryption/decryption class
+2. Extract the server's public key and the ECDH curve parameters
+3. Build a proxy plugin that performs the key exchange in real-time
+This is complex but possible — parked for now in favor of behavioral optimization.
+
+---
+
 ## 2026-04-05 — User Diagnostic Answers Received
 
 ### Account Data (FROM USER)

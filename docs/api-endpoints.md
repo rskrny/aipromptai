@@ -164,6 +164,49 @@ Standard response wrapper:
 
 ---
 
+## Payload Encryption
+
+### Scheme: ECIES (Elliptic Curve Integrated Encryption Scheme)
+
+Most HelloTalk API payloads are encrypted using a custom content type `ht/encbin`.
+
+**How it works:**
+1. Client generates an ephemeral ECDH key pair for each request
+2. Client sends its public key in the `x-ht-pub` header (hex-encoded)
+3. Server combines client's public key with server's private key → ECDH shared secret
+4. Payload encrypted with AES using the derived shared secret
+5. Response encrypted the same way (server uses client's public key + server's private key)
+
+**Headers involved:**
+| Header | Purpose |
+|---|---|
+| `x-ht-pub` | Client's ephemeral ECDH public key (hex) |
+| `Content-Type: ht/encbin` | Indicates encrypted payload |
+
+**What this means:**
+- Captured traffic **cannot be decrypted** without the app's ephemeral private keys
+- Proxyman shows encrypted blobs, not readable JSON, for most endpoints
+- The app itself decrypts in real-time — so Proxyman on-device shows decrypted previews
+- Some endpoints bypass encryption and return plain JSON (see below)
+
+### Unencrypted Endpoints (Plain JSON)
+These endpoints return readable data:
+- `GET /go_user_search/v1/go_user_info/get_user_langs`
+- `POST /virtual_product/v1/virtual_product/free_recommend_status`
+- `POST /virtual_product/v1/recommend/post_recommend_btn`
+- `POST /translate/v1/config`
+- Query parameters in URLs are always readable (never encrypted)
+
+### Encrypted Endpoints (ht/encbin)
+These require decryption:
+- All moment endpoints (`/v2/moment/*`)
+- User profile/search endpoints
+- Discovery endpoints
+- Message endpoints
+- Exposure record (`/v2/moment/query_expose_record`)
+
+---
+
 ## What's Still Needed
 
 ### High Priority

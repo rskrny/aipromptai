@@ -149,6 +149,31 @@ Goal: Lock in the visibility gains and build sustainable engagement.
 
 ---
 
+## Phase 3.5: API-Informed Optimizations (from reverse engineering)
+
+Based on our analysis of the real HelloTalk API traffic, we discovered specific mechanics:
+
+### 1. Visibility Boost System (virtual_type: 14)
+HelloTalk has a built-in "recommendation boost" system. Your account shows `remain_times: 0` — all free boosts are exhausted. This means:
+- The app has a discoverable "boost" button somewhere (look for "Recommend Me" or similar)
+- Free users get a limited number of boosts that refresh on some schedule
+- VIP users likely get more or unlimited boosts
+- **Action**: Look for any "boost" or "get more views" button in the app. It might be in Discovery or Profile. Tap it while Proxyman is running so we can see the API response.
+
+### 2. Nearby Search is Location-Centric
+The `nearby_count` endpoint sends exact GPS coordinates with every search. This confirms:
+- Your physical location directly determines who sees you
+- Hawaii is actually GREAT for this — you're in a unique geographic position
+- Being the only English speaker in Hana, Hawaii means less competition in the nearby pool
+
+### 3. Language Priority Matters
+Your account shows `lang: 2` (Chinese, permanent) and `lang: 13` (unknown, temporary). The temporary language slot might be from an expired VIP feature. Having Chinese as your primary learning language is correct — don't change it.
+
+### 4. Exposure Record Exists
+The `query_expose_record` endpoint exists — HelloTalk tracks exactly how many people see your profile. We couldn't decode this data (encrypted), but it proves they have visibility metrics. If you ever get VIP, the "Visitor" page likely reads from this endpoint.
+
+---
+
 ## Phase 4: Ongoing Optimization
 
 Once visibility is restored, maintain it:

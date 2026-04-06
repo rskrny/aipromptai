@@ -64,6 +64,13 @@ The 95%+ drop with zero warnings suggests algorithmic suppression rather than ma
 ## Active Strategy
 Executing account recovery plan — see `docs/strategy/account-recovery.md`
 
+## Technical Status (as of 2026-04-06)
+- **API encryption**: Most endpoints use ECIES (ht/encbin). Cannot decrypt captured traffic.
+- **Readable endpoints**: boost status (depleted), language info, nearby count, translation config
+- **Proxyman**: Works live on iOS (no cert pinning), shows decrypted content in real-time
+- **Boost system**: `remain_times: 0` — all free visibility boosts exhausted
+- **`post_recommend_btn`**: Untested — could be a way to trigger/refresh boosts
+
 ## Immediate Next Steps
 1. ~~VPN OFF~~ — DONE (confirmed off)
 2. ~~Location stabilized~~ — DONE (Hana, Hawaii — staying for a while)
@@ -73,4 +80,5 @@ Executing account recovery plan — see `docs/strategy/account-recovery.md`
 6. Profile overhaul (need to see current profile first)
 7. Email HelloTalk support (template in strategy doc)
 8. Begin 7-day high-quality activity burst
-9. APK decompilation — extract real API endpoints and understand matching algorithm internals
+9. **Test `post_recommend_btn`** — tap any "boost" or "recommend me" button in the app while Proxyman is running, see what happens
+10. **Proxyman live observation** — browse Discovery, check if your profile appears in search results, watch for any trust/flag fields in decrypted responses

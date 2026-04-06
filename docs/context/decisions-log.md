@@ -40,3 +40,17 @@ Record of every decision made and the reasoning behind it.
 
 **Decision**: Pursue APK decompilation to map real API endpoints.
 **Reasoning**: web.hellotalk.com blocks automated access (403). Mobile app has cert pinning. The community clone gives us the probable data model shape, but to understand the actual matching algorithm, trust scoring, and visibility mechanics, we need the real source. JADX decompilation of the Android APK is the fastest path to real endpoint URLs, auth schemes, and internal logic.
+
+---
+
+## 2026-04-06 — Encryption Analysis & Strategy Pivot
+
+**Decision**: Pivot from "decrypt API traffic" to "behavioral optimization + Proxyman live viewing."
+**Reasoning**: HelloTalk uses ECIES encryption (ECDH key exchange + AES) on most API payloads. Captured traffic cannot be decrypted without APK decompilation to extract the encryption class. However, Proxyman on iOS shows decrypted content in real-time (the app handles decryption). So instead of trying to build a decryption pipeline, we should:
+1. Use Proxyman live viewing to read responses as they happen
+2. Focus on the plain JSON endpoints we CAN read (boost status, language info, nearby count)
+3. Optimize behavior based on what we already know about the algorithm
+4. Park APK decompilation as a future option if behavioral optimization isn't enough
+
+**Decision**: Focus on the `post_recommend_btn` endpoint as a potential free boost trigger.
+**Reasoning**: We found `remain_times: 0` on the free boost system. The `post_recommend_btn` endpoint exists — it might trigger a boost action or reveal how to get more boosts. This is testable through Proxyman observation.
