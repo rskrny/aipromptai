@@ -14,3 +14,19 @@ Record of every decision made and the reasoning behind it.
 
 **Decision**: Do NOT recommend creating a new account.
 **Reasoning**: HelloTalk prohibits multiple accounts and can detect device-level bans. A fresh account on the same device/phone number could get immediately flagged. Better to recover the existing account.
+
+---
+
+## 2026-04-05 — Diagnosis Complete
+
+**Decision**: Location chaos (Europe → China → US + VPN) identified as primary root cause of visibility loss.
+**Reasoning**: 95%+ drop in inbound messages (40+/day → 0-2/day) with no warnings = algorithmic suppression, not manual moderation. The only significant behavioral change was constant location hopping + VPN. HelloTalk tracks precise location. This pattern triggers trust scoring penalties on any platform.
+
+**Decision**: VIP upgrade is required, not optional.
+**Reasoning**: Free account + trust penalty = invisible. VIP's confirmed "extra profile exposure" is the fastest way to counteract algorithmic suppression. The visitor page also lets us track whether visibility is improving (measurable feedback).
+
+**Decision**: Location stabilization is the #1 priority.
+**Reasoning**: No amount of activity or VIP will help if the account keeps triggering trust flags via location inconsistency. Must: turn off VPN, enable location services, stay in one physical location, let the account's location signal stabilize.
+
+**Decision**: Contact HelloTalk support proactively rather than waiting 3 weeks.
+**Reasoning**: Given the severity of the drop (95%+) and the clear non-violation history (zero warnings), it's worth reaching out to support early while simultaneously executing the activity strategy. Two-track approach.

@@ -2,25 +2,68 @@
 
 How to get this account back to "whitelisted" visibility. This is a phased plan — execute in order.
 
+**Last updated**: 2026-04-05
+
 ---
 
-## Phase 0: Diagnostics (Do This First)
+## Diagnosis Summary
 
-Before fixing anything, we need to know what's actually wrong.
+**Root cause**: Location chaos. Account bounced between Europe, China, and the US with VPN usage (2023+). HelloTalk tracks precise location. This pattern triggered algorithmic trust penalties — the system likely flagged the account as suspicious (shared account, bot, or fraud).
 
-### Tests to Run
-1. **Moments visibility test**: Post a Moment with an image in Chinese. Wait 24 hours. Track: likes, corrections, comments. If zero engagement = likely shadow-banned or severely deprioritized.
-2. **Discovery test**: Have a friend with HelloTalk search for English speakers learning Chinese in your area. Can they find your profile? How far do they have to scroll?
-3. **Message test**: Send 3-5 personalized messages to active users. Track response rate. If 0 responses = possible shadow ban on messages.
-4. **Profile review**: Screenshot your profile and share it. We need to check: photo quality, bio completeness, interests filled, CEFR level set, privacy settings correct.
-5. **Notification check**: Go to System Notifications in the app. Any warnings or flags from the HelloTalk team?
+**Evidence**: 40+ inbound messages/day → 0-2/day (95%+ drop) with zero warnings. This magnitude = active algorithmic suppression, not natural decline.
 
-### Settings to Verify
-- **Me > Settings > Privacy > "Who Can Find Me"**: Must NOT be set to hidden
-- **"Show Online Status"**: Must be ON
-- **Location services**: Must be enabled for HelloTalk (they use precise location)
-- **Notification permissions**: Must be ON (so you respond to messages promptly)
-- **Profile language settings**: Native = English, Learning = Chinese (Mandarin)
+**Recovery approach**: Two tracks simultaneously:
+1. **Fix the signals** — stabilize location, upgrade to VIP, clean profile, burst of quality activity
+2. **Contact support** — politely ask them to review the account for restrictions
+
+---
+
+## Phase 0: Emergency Fixes (Do RIGHT NOW)
+
+These are the immediate actions. Do them today.
+
+### 1. Turn off VPN
+If you're using a VPN on your phone, turn it OFF completely. Not just for HelloTalk — turn it off system-wide. VPN IPs are flagged by platforms and create location inconsistencies.
+
+### 2. Turn ON location services for HelloTalk
+- iPhone: Settings > Privacy > Location Services > HelloTalk > "While Using"
+- Android: Settings > Apps > HelloTalk > Permissions > Location > "Allow while using"
+
+### 3. Check privacy settings in HelloTalk
+- Open HelloTalk > Me > Settings > Privacy
+- **"Who Can Find Me"**: Make sure you're NOT hidden. Set to "Everyone" or the most open option.
+- **"Show Online Status"**: Turn ON
+
+### 4. Stay put
+Don't travel or change locations for at least 2-3 weeks. The account needs a stable, consistent location signal to rebuild trust.
+
+### 5. Upgrade to VIP
+This is the single most impactful thing. VIP gives you:
+- **"Extra profile exposure"** — confirmed by HelloTalk. This directly counters the suppression.
+- **Visitor page** — lets you see who's viewing your profile. This is how we measure if recovery is working.
+- **25 new chats/day** instead of 10
+- Annual plan (~$6-7/month) is best value
+
+### 6. Contact HelloTalk support
+Email them now. Be polite, be specific, don't accuse them of anything:
+
+> Subject: Account visibility question
+>
+> Hi HelloTalk team,
+>
+> I've been a HelloTalk user for several years and I love the app. I'm an American learning Chinese.
+>
+> I've noticed that over the past year or so, my account seems to have much lower visibility than it used to. I used to receive many messages from language partners but now I receive very few, and my Moments posts get almost no engagement.
+>
+> I travel frequently and have used the app from different countries. I'm wondering if this might have affected my account's visibility settings. I haven't received any warnings or violations.
+>
+> Could you please check if there are any restrictions or reduced visibility flags on my account? I'd really appreciate any help.
+>
+> Thank you!
+> [Your name]
+> [Your HelloTalk username/ID]
+
+Don't mention VPN usage in the email.
 
 ---
 

@@ -4,6 +4,33 @@ Chronological log of every research finding. Newest entries at the top.
 
 ---
 
+## 2026-04-05 — User Diagnostic Answers Received
+
+### Account Data (FROM USER)
+- Free tier (no VIP)
+- Visibility dropped ~2023, used on and off
+- Location history: Europe (2023) → China → US, with VPN usage
+- No warnings or suspensions ever
+- Was 40+ inbound messages/day → now 0-2/day (95%+ drop)
+- Moments barely getting engagement
+
+### Analysis: Location Chaos is the Primary Culprit
+The location hopping pattern (Europe → China → US + VPN) is almost certainly the main trigger. Here's why:
+
+1. **HelloTalk tracks precise location** — confirmed by multiple sources
+2. **Rapid country changes** look like account sharing, botting, or fraud to any trust system
+3. **VPN usage compounds the problem** — VPN IP ranges are known and flagged by platforms
+4. **China specifically** is significant — HelloTalk is a Chinese company. Using the app FROM China as a foreigner with a US account, especially via VPN, could trigger special scrutiny (Great Firewall interactions, IP inconsistencies)
+5. **The timing matches** — user says drop was ~2023, which is when the location chaos was happening
+
+### Why No Warning Was Sent
+HelloTalk's shadow ban is algorithmic, not manual. Their content policy says they "reduce discoverability" — this doesn't require a warning. The Warning → Suspension → Removal escalation path is for content violations. Algorithmic trust scoring is separate and silent.
+
+### The 40+/day → 0-2/day Drop
+This magnitude of drop (95%+) is NOT natural decline. Natural decline from inactivity would look more like 40 → 20 → 10 → 5. A near-total drop to 0-2 indicates active suppression, not just deprioritization.
+
+---
+
 ## 2026-04-05 — Initial Research Complete
 
 ### HelloTalk Shadow Ban System (CONFIRMED)
