@@ -1,111 +1,187 @@
-# HelloTalk API & Technical Infrastructure
+# HelloTalk API — REAL Endpoints (Reverse Engineered)
 
-## What We Know
+**Last updated**: 2026-04-05
+**Source**: Live traffic capture via Proxyman on iOS (HelloTalk v6.3.0)
+**Status**: NO certificate pinning — full HTTPS interception works
 
-HelloTalk does **not** have a public API. No official documentation exists. Their GitHub org (github.com/hellotalk) has zero public repos. The web client at `web.hellotalk.com` blocks automated access (403). The mobile app uses certificate pinning.
+---
 
-## Infrastructure (Confirmed)
+## Base URL
 
-- **API Gateway**: Apache APISIX (Nginx + LuaJIT / OpenResty)
-- **Message serialization**: Protocol Buffers (lua-protobuf) → converted to JSON at gateway
-- **Rate limiting**: `resty.limit.req` at gateway level
-- **Web client**: `web.hellotalk.com` (403s non-browser requests — must use actual browser)
-- **WebSocket**: Real-time IM via OpenResty protocol conversion
-- **Voice/Video**: Agora SDK
-- **Legacy backend**: PHP (migrated away from)
+**`https://api-global.hellotalk8.com`**
 
-### Global Server Nodes
-- Eastern United States
-- Frankfurt (Europe)
-- Singapore
-- Tokyo
-- Hong Kong
+Note: The domain is `hellotalk8.com`, NOT `hellotalk.com`.
 
-## Probable API Structure (from community clone analysis)
+## CDN Infrastructure (Confirmed)
 
-By analyzing `github.com/francislainy/hellotalk` (a Spring Boot clone that mirrors HelloTalk's data model), we can map the likely API shape:
+| Domain | Purpose |
+|---|---|
+| `api-global.hellotalk8.com` | **Main API** (214+ requests in a single session) |
+| `cdn-global.hellotalk8.com` | Global CDN (images, assets) |
+| `ali-hk-cdn.hellotalk8.com` | Alibaba Cloud Hong Kong CDN |
+| `ali-global-cdn.hellotalk8.com` | Alibaba Cloud Global CDN |
+| `hk-head-cdn.hellotalk8.com` | Hong Kong head CDN |
+| `mnt-global-cdn.hellotalk8.com` | Global CDN |
+| `mmt-vod-cdn.hellotalk8.com` | Video/Voice CDN |
+| `cdn-cn.hellotalk8.com` | China-specific CDN |
+| `sc.hellotalk8.com` | Unknown (1 request) |
+| `hellotalk-app-log-oversea.cn-hongkong...` | Overseas logging (Hong Kong) |
 
-### Base Pattern: `/api/v1/ht/{resource}`
+## Server
 
-### Users
+- **Proxy**: Envoy (confirmed from response headers `server: envoy`)
+- **Gateway**: Apache APISIX (confirmed from earlier research)
+- **Cache**: `EO-Cache-Status` header present (edge caching)
+
+## Authentication
+
+**Method**: JWT Bearer Token
+
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHA...
+```
+
+### Required Custom Headers
+
+| Header | Value | Description |
+|---|---|---|
+| `x-ht-os` | `ios` | Platform |
+| `x-ht-uid` | `98755150` | User ID |
+| `x-ht-did` | `29ea6362a590de...` | Device ID (fingerprint) |
+| `x-ht-timezone` | `-10.00` | Timezone offset |
+| `X-B3-Spanid` | `0000000000000001` | Distributed tracing (Zipkin/Jaeger) |
+| `Content-Type` | `application/json` | Request body format |
+| `Accept-Language` | `en-US;q=1.0, zh-Hans-US;q=0.9` | Language preference |
+| `User-Agent` | `ios;6.3.0;iPhone14,3;26.4;98755150` | Format: `{os};{app_version};{device_model};{os_version};{user_id}` |
+
+---
+
+## REAL API Endpoints (Captured from Live Traffic)
+
+### Discovery / User Search
+
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/api/v1/ht/users/{userId}` | Get a user's profile |
-| GET | `/api/v1/ht/users` | List/search users (discovery) |
-| POST | `/api/v1/ht/users` | Create user (registration) |
-| PUT | `/api/v1/ht/users/{userId}` | Update profile |
-| DELETE | `/api/v1/ht/users/{userId}` | Delete account |
+| GET | `/go_user_search/v1/go_user_info/get_user_langs?user_id={uid}` | Get a user's language info |
+| GET | `/go_user_search/v2/nearby_count?htntKey={key}&latitude={lat}&longitude={lon}&learnlang={id}&page={n}&sort=distance&userid={uid}` | **Nearby user search** with location |
+
+#### Nearby Search Parameters
+- `htntKey`: API key/session token (e.g., `a7e1869d5fd2e7954a683439fca094ff`)
+- `latitude` / `longitude`: Precise GPS coordinates
+- `learnlang`: Target language code (2 = Chinese)
+- `page`: Pagination
+- `sort`: Sort order (`distance`)
+- `userid`: Your user ID
 
 ### Moments (Social Feed)
+
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/api/v1/ht/moments/{momentId}` | Get a single moment |
-| GET | `/api/v1/ht/moments` | Get moments feed |
-| GET | `/api/v1/ht/moments/user?userId={id}` | Get a user's moments |
-| POST | `/api/v1/ht/moments` | Create a moment |
-| PUT | `/api/v1/ht/moments/{momentId}` | Update a moment |
-| PUT | `/api/v1/ht/moments/{momentId}/like` | Like a moment |
-| DELETE | `/api/v1/ht/moments/{momentId}/unlike` | Unlike a moment |
-| DELETE | `/api/v1/ht/moments/{momentId}` | Delete a moment |
+| POST | `/v2/moment/latest` | Get latest moments feed |
+| POST | `/v2/moment/view_content` | View a specific moment's content |
+| POST | `/v2/moment/like` | Like a moment |
+| POST | `/v2/moment/query_expose_record` | **Query YOUR exposure/visibility metrics** |
+| POST | `/v2/moment/query_expo...` | (truncated — exposure related) |
+| POST | `/go_moment/v2/get_moment_tab_info` | Get moment tab configuration |
 
-### Comments (on Moments)
+### Virtual Products / Boost System
+
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/api/v1/ht/moments/{momentId}/comments` | List comments on a moment |
-| GET | `/api/v1/ht/moments/{momentId}/comments/{commentId}` | Get single comment |
-| POST | `/api/v1/ht/moments/{momentId}/comments` | Post a comment |
-| PUT | `/api/v1/ht/moments/{momentId}/comments/{commentId}` | Edit a comment |
-| DELETE | `/api/v1/ht/moments/{momentId}/comments/{commentId}` | Delete a comment |
-| POST | `/api/v1/ht/moments/{momentId}/comments/{commentId}/replies` | Reply to comment |
-| GET | `/api/v1/ht/moments/{momentId}/comments/{commentId}/replies` | Get replies |
+| POST | `/virtual_product/v1/virtual_product/free_recommend_status` | **Check remaining free visibility boosts** |
+| POST | `/virtual_product/v1/recommend/post_recommend_btn` | Trigger a recommendation/boost action |
 
-### Messages / Chats
+### Translation
+
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/api/v1/ht/messages/{messageId}` | Get a message |
-| GET | `/api/v1/ht/messages` | List all messages |
-| POST | `/api/v1/ht/messages` | Send a message |
-| PUT | `/api/v1/ht/messages/{messageId}` | Edit a message |
-| DELETE | `/api/v1/ht/messages/{messageId}` | Delete a message |
-| GET | `/api/v1/ht/messages/chats/{chatId}` | Get a conversation |
-| GET | `/api/v1/ht/messages/chats` | List all conversations |
+| POST | `/translate/v1/config` | Get translation configuration |
 
-### Followships (Friends/Partners)
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/v1/ht/followship/{followshipId}` | Get a followship |
-| GET | `/api/v1/ht/followship` | List all followships |
-| GET | `/api/v1/ht/followship/from/user/{userId}` | Who this user follows |
-| GET | `/api/v1/ht/followship/to/user/{userId}` | Who follows this user |
-| POST | `/api/v1/ht/followship` | Follow a user |
-| DELETE | `/api/v1/ht/followship/{followshipId}` | Unfollow |
+---
 
-### Key Data Types
-- All IDs are **UUIDs**
-- Request/response bodies are **JSON**
-- Authentication likely via Bearer token or session cookie
+## Key API Responses (Captured)
 
-## Other Community Projects
+### `free_recommend_status` — Visibility Boost System
 
-| Project | Tech | Notes |
-|---|---|---|
-| `francislainy/hellotalk` | Java 17 / Spring Boot | Most complete clone — mirrors full data model |
-| `francislainy/hellotalk-ui` | Frontend | UI companion to above |
-| `vanpersie-20/HelloTalk` | PHP | Simpler clone with Chinese UI (login=denglu, register=zhuce) |
-| `leejh3224/react-native-hello-talk` | React Native / Firebase | Mobile clone |
-| `shirakaba/react-nativescript-pikatalk` | React NativeScript | HelloTalk-inspired app |
+**Request Body:**
+```json
+{
+  "os_version": "26.4",
+  "nationality": "US",
+  "lang_id": 1,
+  "native_lang": 1,
+  "os_type": 0,
+  "user_id": 98755150,
+  "app_version": "6.3.0",
+  "virtual_type": 14
+}
+```
+
+**Response Body:**
+```json
+{
+  "status": 0,
+  "msg": "success",
+  "data": {
+    "remain_times": 0,
+    "virtual_type": 14
+  }
+}
+```
+
+**Analysis**: `remain_times: 0` means all free recommendation boosts are exhausted. `virtual_type: 14` is the product code for discovery recommendations. This is a key finding — the app has a built-in boost system, and this account's boosts are depleted.
+
+### `query_expose_record` — Visibility Metrics
+
+Response body was in a format that couldn't be previewed on iOS (likely protobuf or compressed). Contains actual exposure/visibility data. Need to export via AirDrop or capture on desktop to decode.
+
+---
+
+## Language Codes (Discovered)
+
+| Code | Language |
+|---|---|
+| 1 | English |
+| 2 | Chinese (Mandarin) |
+
+## Platform Codes
+
+| Code | Platform |
+|---|---|
+| 0 | iOS |
+| 1 | Android (assumed) |
+
+## API Response Format
+
+Standard response wrapper:
+```json
+{
+  "status": 0,          // 0 = success
+  "msg": "success",     // Status message
+  "data": { ... }       // Response payload
+}
+```
+
+---
 
 ## What's Still Needed
 
-To get the REAL API (not the clone):
-1. **Browser DevTools on web.hellotalk.com** — log in with a real account, open Network tab, capture actual requests
-2. The clone gives us the data model shape, but the real URLs, auth headers, and query parameters need traffic capture
-3. Real API likely uses protobuf (not JSON) on mobile — web client may use JSON
+### High Priority
+- [ ] Full endpoint list (need to scroll through all 214 captured requests)
+- [ ] User profile endpoint — would show account flags/trust score
+- [ ] Discovery/partner search endpoint (not just nearby count)
+- [ ] `query_expose_record` response decoded (need desktop export)
+- [ ] Any endpoint containing `user/info`, `user/profile`, `user/status`, `account/`
 
-## APK Analysis Path
+### Medium Priority
+- [ ] Message sending endpoints
+- [ ] Correction endpoints
+- [ ] Settings/privacy endpoints
+- [ ] Any endpoint with `ban`, `restrict`, `flag`, `trust`, `score`, `rank`, `weight`
 
-Latest APK: v6.3.12 (March 2026, 318 MB, requires Android 8.0+)
-- Available on APKPure, Aptoide, Uptodown
-- Can be decompiled with JADX to extract: hardcoded URLs, API endpoints, auth logic, cert pinning implementation
-- Tool: `ApiEndpointExtractor` (github.com/hangga/ApiEndpointExtractor) — GUI for extracting endpoints from APKs
-- The APK would reveal the REAL base URLs, endpoint paths, and authentication scheme
+### To Get More Data
+Export from Proxyman on iOS:
+1. Tap ⋯ (More) menu at bottom right
+2. Look for Export/Share option
+3. Export as HAR or Proxyman format
+4. Email it to yourself or share via iCloud/Google Drive

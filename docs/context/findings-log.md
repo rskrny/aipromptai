@@ -29,6 +29,49 @@ HelloTalk's shadow ban is algorithmic, not manual. Their content policy says the
 ### The 40+/day → 0-2/day Drop
 This magnitude of drop (95%+) is NOT natural decline. Natural decline from inactivity would look more like 40 → 20 → 10 → 5. A near-total drop to 0-2 indicates active suppression, not just deprioritization.
 
+## 2026-04-05 — LIVE API Traffic Captured (Proxyman on iOS)
+
+### Major Breakthrough: No Certificate Pinning
+HelloTalk v6.3.0 on iOS does NOT enforce certificate pinning. Proxyman with SSL proxying enabled can intercept ALL API traffic. This gives us full visibility into the real API.
+
+### Real API Base URL
+`https://api-global.hellotalk8.com` — NOT hellotalk.com! The actual domain is hellotalk8.com.
+
+### Auth Scheme: JWT Bearer Token
+- Bearer token in Authorization header
+- Custom headers: x-ht-os (platform), x-ht-uid (user ID), x-ht-did (device fingerprint), x-ht-timezone
+- User-Agent encodes: os, app version, device model, OS version, user ID
+- Server runs Envoy proxy (confirmed from headers)
+
+### Critical Finding: Visibility Boost System
+Endpoint: `/virtual_product/v1/virtual_product/free_recommend_status`
+Response: `{"remain_times": 0, "virtual_type": 14}`
+- HelloTalk has a built-in "recommendation" virtual product system (type 14)
+- Free users get a limited number of boosts
+- THIS ACCOUNT HAS ZERO REMAINING BOOSTS
+- This means the account gets NO algorithmic visibility push
+- VIP likely gets more or refreshed boosts — this explains part of the visibility drop
+
+### Exposure Tracking Endpoint Found
+`/v2/moment/query_expose_record` — tracks visibility/exposure metrics
+- Response couldn't be decoded on iOS (likely protobuf/binary)
+- Need desktop export to read the actual visibility data
+
+### Nearby Search Endpoint
+`/go_user_search/v2/nearby_count` — sends exact GPS coordinates, target language, and user ID
+- Confirms location is core to matching (lat/lon sent with every search)
+- htntKey parameter appears to be a session/API key
+
+### User Profile Data Sent in API Calls
+- user_id: 98755150
+- nationality: US
+- native_lang: 1 (English)
+- lang_id: 1 (English)
+- Device: iPhone 13 Pro Max, iOS 26.4
+- App version: 6.3.0
+
+---
+
 ## 2026-04-05 — API Structure Mapped (from community clone)
 
 ### Probable API Shape (from francislainy/hellotalk on GitHub)
