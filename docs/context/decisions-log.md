@@ -30,3 +30,13 @@ Record of every decision made and the reasoning behind it.
 
 **Decision**: Contact HelloTalk support proactively rather than waiting 3 weeks.
 **Reasoning**: Given the severity of the drop (95%+) and the clear non-violation history (zero warnings), it's worth reaching out to support early while simultaneously executing the activity strategy. Two-track approach.
+
+**Decision**: User declined VIP — respect this and optimize within free tier.
+**Reasoning**: User said it's against their principles. We have 10 new chats/day and no visitor page, but the core recovery strategy (location stability, activity burst, corrections, moments) still works without VIP. We just can't measure visibility via the visitor page — will have to track inbound message count instead.
+
+---
+
+## 2026-04-05 — APK Decompilation Decision
+
+**Decision**: Pursue APK decompilation to map real API endpoints.
+**Reasoning**: web.hellotalk.com blocks automated access (403). Mobile app has cert pinning. The community clone gives us the probable data model shape, but to understand the actual matching algorithm, trust scoring, and visibility mechanics, we need the real source. JADX decompilation of the Android APK is the fastest path to real endpoint URLs, auth schemes, and internal logic.

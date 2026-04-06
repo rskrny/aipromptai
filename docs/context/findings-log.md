@@ -29,6 +29,29 @@ HelloTalk's shadow ban is algorithmic, not manual. Their content policy says the
 ### The 40+/day → 0-2/day Drop
 This magnitude of drop (95%+) is NOT natural decline. Natural decline from inactivity would look more like 40 → 20 → 10 → 5. A near-total drop to 0-2 indicates active suppression, not just deprioritization.
 
+## 2026-04-05 — API Structure Mapped (from community clone)
+
+### Probable API Shape (from francislainy/hellotalk on GitHub)
+Analyzed the most complete community clone. The real HelloTalk API likely follows a similar pattern:
+- Base path: `/api/v1/ht/{resource}`
+- Resources: users, moments, messages, chats, followships, comments
+- All IDs are UUIDs
+- Standard REST CRUD + specialized actions (like, unlike, reply)
+- Moments support: create, edit, delete, like/unlike, comment, reply to comments
+- Messages support: send, edit, delete, plus chat/conversation grouping
+- Followships: follow/unfollow with from/to user queries
+
+### Web Client Blocks Automated Access
+- `web.hellotalk.com` returns 403 to non-browser requests
+- Must use an actual browser with DevTools to capture traffic
+- Mobile app uses certificate pinning — needs Frida to bypass
+
+### APK Decompilation Path Identified
+- Latest APK: v6.3.12, 318 MB, Android 8.0+
+- Can be decompiled with JADX
+- Tool exists to auto-extract API endpoints from APKs: `ApiEndpointExtractor`
+- This would reveal: real base URLs, auth scheme, cert pinning impl, endpoint paths
+
 ---
 
 ## 2026-04-05 — Initial Research Complete

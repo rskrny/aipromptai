@@ -41,19 +41,36 @@ The 95%+ drop with zero warnings suggests algorithmic suppression rather than ma
 - [x] Moments getting barely any engagement
 - [x] Never received any HelloTalk system warnings
 
-## Still Need to Know
-- [ ] What's the profile currently look like? (photo, bio, interests?)
-- [ ] Where is the user right now? (city/state)
-- [ ] Is VPN currently active?
-- [ ] What phone/device? (iOS or Android?)
-- [ ] Are privacy settings correctly configured?
+## Confirmed Settings (from screenshot 2026-04-05)
+- **Location**: Hana, United States (Maui, Hawaii)
+- **VPN**: OFF
+- **Device**: iPhone (iOS — confirmed from screenshot UI)
+- **Show Country/Region**: ON
+- **Show City**: ON
+- **Update Location**: ON
+- **Show Age**: ON
+- **Show Zodiac**: OFF
+- **Show Online Status**: ON
+- **Show My Like Count**: OFF ← SHOULD TURN ON
+- **Show My Gifting Level**: OFF
+- **Birthday Notification**: OFF ← SHOULD TURN ON
+- **Personalized Ads**: OFF
+
+## Still Need
+- [ ] Profile screenshot (photo, bio, interests) — need to evaluate quality
+- [ ] What does the "Who Can Find Me" setting look like? (scroll down on privacy page)
+- [ ] Confirmation of language settings (Native=English, Learning=Chinese)
 
 ## Active Strategy
 Executing account recovery plan — see `docs/strategy/account-recovery.md`
 
 ## Immediate Next Steps
-1. VPN OFF immediately if still using one
-2. VIP upgrade (critical for the exposure boost)
-3. Profile overhaul
-4. Location stabilization — stay in one place, location services ON
-5. 7-day high-quality activity burst
+1. ~~VPN OFF~~ — DONE (confirmed off)
+2. ~~Location stabilized~~ — DONE (Hana, Hawaii — staying for a while)
+3. VIP upgrade — USER DECLINED (against principles — respect this, work without it)
+4. Turn on "Show My Like Count" and "Birthday Notification"
+5. Check "Who Can Find Me" setting
+6. Profile overhaul (need to see current profile first)
+7. Email HelloTalk support (template in strategy doc)
+8. Begin 7-day high-quality activity burst
+9. APK decompilation — extract real API endpoints and understand matching algorithm internals
