@@ -4,6 +4,58 @@ Chronological log of every research finding. Newest entries at the top.
 
 ---
 
+## 2026-04-06 — Web Client (web.hellotalk.com) JS Encryption Investigation
+
+### Objective
+Attempted to fetch HelloTalk's web client at web.hellotalk.com to examine JavaScript bundles for encryption implementation (searching for `encbin`, `x-ht-pub`, ECDH, AES, etc.).
+
+### Result: BLOCKED — Cannot Access web.hellotalk.com
+
+**All attempts to fetch web.hellotalk.com failed due to two independent blockers:**
+
+1. **Sandbox egress proxy restriction**: The Claude Code remote environment uses an egress proxy that only allows connections to a whitelist of developer-related domains (GitHub, npm, PyPI, etc.). `web.hellotalk.com`, `hellotalk.com`, `web.archive.org`, and all HelloTalk-related domains are NOT on this allowlist. Every request returns `403 Forbidden` with `x-deny-reason: host_not_allowed` from the Envoy proxy.
+
+2. **HelloTalk blocks non-browser requests**: Even outside this sandbox, prior research (findings-log entry from 2026-04-05) confirmed that web.hellotalk.com returns 403 to non-browser user agents. It requires a real browser session.
+
+### What We Searched (All came up empty)
+
+| Source | Search Terms | Result |
+|---|---|---|
+| WebFetch | web.hellotalk.com, /manifest.json, /asset-manifest.json, /login, /app, /index.html | All 403 (egress blocked) |
+| WebFetch | web.archive.org (Wayback Machine CDX API) | 403 (egress blocked) |
+| Web Search | "encbin", "x-ht-pub", "ht/enc", HelloTalk encryption | Zero relevant results |
+| Web Search | web.hellotalk.com JavaScript, Vue, React, webpack | Zero results about HT's frontend |
+| GitHub Code Search | "ht/encbin", "x-ht-pub", "hellotalk8", hellotalk encrypt | Zero results |
+| GitHub Org | github.com/HelloTalk | No public repositories |
+| Chrome Extension | HelloTalk Web (loedoiobojbikghbclmiofokfchcllek) | Removed from Chrome Web Store 2021-08-03; was just a wrapper that opened web.hellotalk.com in a tab |
+
+### Key Architectural Findings (from search results)
+
+1. **HelloTalk's WebIM uses OpenResty + WebSocket**: The web client connects via WebSocket protocol, with OpenResty acting as a protocol conversion layer between the web client and their C++ IM backend.
+2. **Message architecture**: WebSocket + long polling + httpdns + built-in IP failover.
+3. **No Electron app**: HelloTalk has no official desktop app. The web client at web.hellotalk.com is a pure browser-based web app.
+4. **The Chrome extension (v1.0.3) was trivial**: Just opened web.hellotalk.com in a new tab. No custom encryption logic in the extension itself.
+
+### Assessment: Web Client Likely Does NOT Use ht/encbin
+
+**Reasoning:**
+- The `ht/encbin` encryption was discovered on the iOS mobile API (v6.3.0) communicating with `api-global.hellotalk8.com`
+- The web client uses WebSocket connections via OpenResty, a fundamentally different transport than the mobile REST API
+- Web clients typically use TLS for transport security and may use a different (or no) application-layer encryption scheme
+- The mobile app has native code (likely C/C++ or Java crypto libraries) for ECDH — implementing the same scheme in JavaScript would expose the entire algorithm in readable source code, which is unusual for proprietary encryption
+- However, this is speculative — we cannot confirm without actually inspecting the web client's JS bundles
+
+### How to Actually Get the JS Bundles (requires browser access)
+
+1. **Open web.hellotalk.com in Chrome** (must be logged in)
+2. **Open DevTools** (F12) > Sources tab
+3. Look for webpack:// or similar source tree
+4. Search across all sources for: `encbin`, `x-ht-pub`, `ht-pub`, `encrypt`, `ECDH`, `deriveKey`, `SubtleCrypto`, `CryptoJS`
+5. **Network tab**: Filter by JS to see all loaded bundles, then copy their URLs
+6. **Alternative**: Use `curl` from a local machine (not this sandbox) with full browser headers to fetch the page and extract `<script>` tags
+
+---
+
 ## 2026-04-06 — HelloTalk API Encryption Research (`ht/encbin` and `x-ht-pub`)
 
 ### What We Know
