@@ -14,13 +14,20 @@
 
 ## Diagnosis — UPDATED (2026-04-11)
 
-### ROOT CAUSE: Search Index Exclusion (profile lock PARTIALLY CLEARED)
+### ROOT CAUSE: Search Index Exclusion — account in PARTIAL REBUILD state
 
-**STATE AS OF 2026-04-11:**
+**STATE AS OF 2026-04-11 (encrypted probe run from GitHub Actions):**
 - Profile lock LIFTED — user reports they can now edit profile fields. "System maintenance" message is gone. No warnings. Likely cleared by HelloTalk support in response to our 2026-04-06 unlock email.
-- Visibility STILL BROKEN — user still gets zero inbound traffic from strangers. Moments get ~10 likes each (likely from existing 1,070 followers via follow graph), but no profile views, no new stranger DMs. This strongly suggests the search index exclusion is still active.
+- **`filter` endpoint state CHANGED**: 2026-04-06 returned `code 6000 "Get Search User Plan Failed"`. 2026-04-11 returns `code 4000 "Get Params Failed"`. Same endpoint, same params — the specific exclusion error is gone, replaced by a different error at a later pipeline stage.
+- **`recommend` endpoint still excluded** but with a NEW error: `code 6000 "user flow up failed"` (previously "Get Search User Plan Failed"). User is not yet appearing in discovery feed, but the reason is different — suggests an incomplete rebuild rather than an explicit exclusion.
+- **Location corruption RESOLVED**: `nearby_count` returns `{"full_country": "United States", "display_city": "Hana"}` cleanly. On 2026-04-06, `choose_place` was returning random countries. That pollution is cleared.
+- **Ghost `lang: 13, is_temp: 1`** still present on `get_user_langs` alongside the legitimate `lang: 2` Chinese. Possibly a residual blocker on the ranking / indexing side.
+- Visibility symptomatically still broken for the user — moments get ~10 likes (follow-graph), no new stranger DMs. Effects of the state change may take hours or days to manifest to the user.
 - Face verification PERMANENTLY LOCKED OUT — user cannot redo face verification because they did it once in China 2 years ago. App blocks re-verification. `is_real_auth: false` + `verify_status: 2` is stuck; the 4000 ranking points from `real_avatar` are unreachable through normal means.
 - Privacy settings confirmed correct: Who Can Find Me = Everyone, Languages = Native English / Learning Chinese, hobbies filled, photo is clear face.
+
+### Working theory (revised 2026-04-11 post-encrypted-probe)
+The account was in a fully-excluded state on 2026-04-06. Between 2026-04-06 and 2026-04-11, the profile lock lifted (support action) and the backend began a partial rebuild. Location corruption has cleared, and the filter endpoint has progressed to a later pipeline stage. The recommend feed still refuses the user but with an error that suggests an incomplete rebuild rather than permanent exclusion. We are watching a recovery-in-progress. The ghost lang 13 and/or one more support push may be what's needed to complete it.
 
 **HISTORICAL (2026-04-06) — still valid technical state on server unless we re-check:**
 - `go_user_search/v2/filter` returned error code 6000 `"Get Search User Plan Failed"` — search service refused to index this account

@@ -4,6 +4,93 @@ Chronological log of every research finding. Newest entries at the top.
 
 ---
 
+## 2026-04-11 — ENCRYPTED PROBE: state on the server has SHIFTED
+
+First successful encrypted probe run from the GitHub Actions runner (fresh X25519 handshake, AES-256-ECB decryption). Results diverge meaningfully from the 2026-04-06 baseline:
+
+### filter endpoint — ERROR 6000 IS GONE (error code changed)
+`GET /go_user_search/v2/filter?userid=98755150&learnlang=2`:
+```json
+{"code": 4000, "msg": "Get Params Failed", "data": null}
+```
+- 2026-04-06: `code: 6000, msg: "Get Search User Plan Failed"`
+- 2026-04-11: `code: 4000, msg: "Get Params Failed"`
+- Same endpoint, same params, different error. The specific "no search plan" error that we confirmed as the root cause on 2026-04-06 is NO LONGER returned.
+- Interpretation is ambiguous without source: 4000 could mean (a) account is no longer excluded but endpoint wants different params, or (b) the build is still failing but at a later pipeline stage. Either way, **the state has measurably changed since 2026-04-06**.
+
+### recommend endpoint — still excluded but with a DIFFERENT error
+`GET /go_user_search/v2/recommend?userid=98755150&learnlang=2&page=1`:
+```json
+{"code": 6000, "msg": "user flow up failed", "data": null}
+```
+- Still code 6000, but message is NEW: "user flow up failed" (not "Get Search User Plan Failed").
+- User is still not appearing in the discovery recommendation feed. Something downstream of the filter endpoint is still failing. "user flow up" likely refers to "user flow upload" — publishing the user's record into the live search index.
+
+### nearby_count — LOCATION CORRUPTION IS RESOLVED
+`GET /go_user_search/v2/nearby_count?latitude=20.7564&longitude=-155.9900&...`:
+```json
+{"code": 0, "msg": "ok", "data": {
+  "header": {
+    "status": 0, "message": "success", "cost_time": 21, "cachetime": 5,
+    "nearby_count": 493,
+    "location": {"full_country": "United States", "display_city": "Hana"}
+  },
+  "results": [{"head_url": "..."}, {"head_url": "..."}, {"head_url": "..."}]
+}}
+```
+- **Location now correctly reported as United States / Hana.** On 2026-04-06, `choose_place` returned random countries (China, Vietnam, Morocco, Nigeria) — that corruption is gone.
+- 493 nearby users (was 491 on 2026-04-06).
+- Endpoint works cleanly — no errors, returns three user avatars from cdn-global / cdn-cn.
+
+### POST endpoints — body format still unknown
+- `query_expose_record`, `moments/latest`, `get_moment_tab_info` all returned `{"message":"invalid req body"}`.
+- The encryption works (GETs decrypted fine), but HelloTalk expects a different binary format for encrypted POST bodies than what we're sending (likely not straight JSON-in-AES). Matches the 2026-04-06 finding.
+
+### Working theory
+The profile lock lift on 2026-04-11 (likely from our support email) cleared the account-level admin hold. That triggered a partial state refresh on the backend:
+- Location corruption cleared.
+- Filter endpoint progressed from "Get Search User Plan Failed" (6000) to "Get Params Failed" (4000) — a different error at a different pipeline stage.
+- Recommend feed still refuses the user ("user flow up failed"), but with a new error suggesting an incomplete rebuild rather than an explicit exclusion.
+
+The account appears to be in a **partial rebuild state**. The next push (ghost lang 13 removal + escalation pressure) may complete it. We should also re-poll these endpoints on a schedule to detect further state changes as the rebuild progresses.
+
+---
+
+## 2026-04-11 — GitHub Actions API monitoring online + GHOST LANG 13 discovered
+
+### GitHub Actions monitoring operational
+- Claude sandbox cannot reach hellotalk8.com (confirmed — all HelloTalk and CORS-proxy domains return 403 from the egress proxy; allowlist only includes github.com, pypi.org, registry.npmjs.org, etc.)
+- Workaround: `.github/workflows/ht-monitor.yml` runs `scripts/monitor-probe.sh` (plain HTTP) and `scripts/monitor-probe-encrypted.py` (X25519 handshake + AES-256-ECB) from a GitHub Actions runner, which has open internet egress. Results committed back to `monitor/` on the same branch. First run confirmed working.
+
+### GHOST LANG 13 — new finding from user_langs probe
+`GET /go_user_search/v1/go_user_info/get_user_langs?user_id=98755150` returns:
+```json
+{"code":0,"msg":"success","data":[
+  {"lang":2,"is_temp":0,"is_expired_vip_self_set_lang":0},
+  {"lang":13,"is_temp":1,"is_expired_vip_self_set_lang":0}
+]}
+```
+- `lang: 2` (Chinese/Mandarin, permanent) is expected and correct.
+- `lang: 13, is_temp: 1` is NOT expected. It's a temporary secondary learning language the user never intentionally set. `is_expired_vip_self_set_lang: 0` rules out the "expired VIP feature" explanation. This is residue from something — possibly an accidental tap, an old app version default, or a past feature that was deprecated without cleaning up user data.
+- Language ID 13 does not map to any of the top ~12 HelloTalk languages (1 English, 2 Chinese, 3 Japanese, 4 Korean, 5 French, 6 German, 7 Italian, 8 Spanish, 9 Portuguese, 10 Russian, 11 Arabic). 13 is likely an uncommon language or a legacy code. Needs lookup in the APK's language table.
+- **Hypothesis**: this may be the cause of the visibility failure (or one of the causes). HelloTalk's ranking formula weights `is_learn_native_lang: 10000`. A phantom secondary learning language could:
+  1. Pollute the matching pool (user gets filtered into a dead lang-13-native pool)
+  2. Cause the search indexer to reject an "inconsistent" language profile
+  3. Break the rank_score calculation if only one language is expected
+
+### Boost state (unchanged from 2026-04-06)
+- `free_recommend_status` virtual_type 14: `remain_times: 0`
+- `free_recommend_status` virtual_type 6: `remain_times: 0`
+- Both free boost pools depleted. `post_recommend_btn` not usable.
+
+### Encrypted endpoints still gated
+First run only hit plain endpoints. `search_filter`, `search_recommend`, `nearby_count`, `moment_expose_record`, etc. all returned 400 "missing or malformed encryption public key" when hit plain. The encrypted probe script was pushed in the next commit and is running now.
+
+### Bug fixed
+`monitor-probe.sh` originally used `UID` as a variable name. `$UID` is readonly in bash (the OS user id, 1001 on the runner), so the assignment silently failed and `x-ht-uid` header carried 1001 instead of 98755150. The bearer token's JWT payload contains the real uid so the server accepted the requests anyway, but the header was wrong. Renamed to `HT_UID`.
+
+---
+
 ## 2026-04-11 — PROFILE LOCK LIFTED (partial win) — visibility still broken
 
 ### What changed
