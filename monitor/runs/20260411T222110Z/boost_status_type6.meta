@@ -1,0 +1,6 @@
+name=boost_status_type6
+method=POST
+url=https://api-global.hellotalk8.com/virtual_product/v1/virtual_product/free_recommend_status
+http_code=200
+size=72
+request_body={"os_version":"26.4","nationality":"US","lang_id":1,"native_lang":1,"os_type":0,"user_id":98755150,"app_version":"6.3.0","virtual_type":6}

@@ -1,0 +1,7 @@
+name=enc_moment_tab_info
+method=POST
+path=/go_moment/v2/get_moment_tab_info
+http_code=400
+content_length=31
+content_type=application/json
+parse_kind=plain

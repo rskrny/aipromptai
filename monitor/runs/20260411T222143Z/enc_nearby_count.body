@@ -1,0 +1,28 @@
+{
+  "code": 0,
+  "msg": "ok",
+  "data": {
+    "header": {
+      "status": 0,
+      "message": "success",
+      "cost_time": 21,
+      "cachetime": 5,
+      "nearby_count": 493,
+      "location": {
+        "full_country": "United States",
+        "display_city": "Hana"
+      }
+    },
+    "results": [
+      {
+        "head_url": "https://cdn-global.hellotalk8.com/ht-global-1312929133/ua/1/260409/1/152028446/0/0/b4f5c146105817d24fe8632b52920966.jpg"
+      },
+      {
+        "head_url": "https://cdn-global.hellotalk8.com/ht-global-1312929133/ua/1/250826/0/0/0/0/a89fc2a3-baf9-4a91-8972-664f29fd3c74.jpg"
+      },
+      {
+        "head_url": "https://cdn-cn.hellotalk8.com/ht-cn-1312929133/ua/1/251130/1/141480034/0/0/3300ad6bfca975a413a3044217f6944e.jpg"
+      }
+    ]
+  }
+}

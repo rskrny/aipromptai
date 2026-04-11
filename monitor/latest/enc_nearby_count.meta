@@ -1,0 +1,7 @@
+name=enc_nearby_count
+method=GET
+path=/go_user_search/v2/nearby_count
+http_code=200
+content_length=368
+content_type=ht/encbin
+parse_kind=decrypted_json

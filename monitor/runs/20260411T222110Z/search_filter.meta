@@ -1,0 +1,5 @@
+name=search_filter
+method=GET
+url=https://api-global.hellotalk8.com/go_user_search/v2/filter?userid=98755150&learnlang=2
+http_code=400
+size=57
