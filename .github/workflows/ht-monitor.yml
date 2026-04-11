@@ -18,6 +18,7 @@ on:
     paths:
       - 'scripts/monitor-probe.sh'
       - 'scripts/monitor-probe-encrypted.py'
+      - 'scripts/fetch-public-pages.sh'
       - '.github/workflows/ht-monitor.yml'
 
 permissions:
@@ -53,6 +54,11 @@ jobs:
 
       - name: Run encrypted API probes
         run: python3 scripts/monitor-probe-encrypted.py
+
+      - name: Fetch public HelloTalk pages
+        run: |
+          chmod +x scripts/fetch-public-pages.sh
+          bash scripts/fetch-public-pages.sh
 
       - name: Commit results
         run: |

@@ -121,7 +121,7 @@ probe "search_recommend" GET \
   "$BASE/go_user_search/v2/recommend?userid=98755150&learnlang=2&page=1"
 
 probe "search_nearby_count" GET \
-  "$BASE/go_user_search/v2/nearby_count?latitude=20.7564&longitude=-155.9900&learnlang=2&page=1&sort=distance&userid=98755150"
+  "$BASE/go_user_search/v2/nearby_count?latitude=42.3601&longitude=-71.0589&learnlang=2&page=1&sort=distance&userid=98755150"
 
 probe "user_langs" GET \
   "$BASE/go_user_search/v1/go_user_info/get_user_langs?user_id=98755150"

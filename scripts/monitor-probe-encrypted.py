@@ -164,9 +164,9 @@ def main() -> int:
         # Discovery feed — are we appearing in recommendations?
         ("enc_search_recommend", "GET", "/go_user_search/v2/recommend",
          {"userid": HT_UID, "learnlang": "2", "page": "1"}, None),
-        # Nearby user count for our location
+        # Nearby user count for our location (Boston — profile city)
         ("enc_nearby_count", "GET", "/go_user_search/v2/nearby_count",
-         {"latitude": "20.7564", "longitude": "-155.9900",
+         {"latitude": "42.3601", "longitude": "-71.0589",
           "learnlang": "2", "page": "1", "sort": "distance",
           "userid": HT_UID}, None),
         # Exposure record — reveals whether our moments are being shown
