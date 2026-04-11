@@ -4,6 +4,41 @@ Chronological log of every research finding. Newest entries at the top.
 
 ---
 
+## 2026-04-11 — PROFILE LOCK LIFTED (partial win) — visibility still broken
+
+### What changed
+User reports they can now edit profile fields in the app. "System maintenance" message is gone. No warnings. This is the first state change since 2026-04-06 when the unlock email was sent to support@hellotalk.com. Strong indication that support acted on the email, cleared the admin-level profile lock, and then stopped. The underlying search plan exclusion was not cleared.
+
+### Symptoms remaining
+- Zero inbound DMs from strangers — discovery still appears broken
+- Moments still get ~10 likes each — this is the follow-graph channel working normally, NOT evidence of discovery working. With 1,070 followers, 10 likes/post is what you'd expect from the subset that scrolls the feed.
+- Profile visits: user reports zero (unclear if literal counter or inferred from stranger DM count — needs clarification)
+
+### Face verification confirmed permanently blocked
+The 4000-point `real_avatar` ranking factor is unreachable. HelloTalk only allows face verification ONCE per account. User did it in China 2 years ago. App blocks re-verification even though `is_real_auth: false` on server. This is a dead end — no point spending more time on it.
+
+### Privacy settings all confirmed correct (user-verified 2026-04-11)
+- Who Can Find Me = Everyone
+- Languages = Native English, Learning Chinese (only)
+- Profile photo = clear face
+- Hobbies filled
+- Found and used the boost button (status unclear — need to re-check `free_recommend_status`)
+
+### Implications
+The profile lock and the search plan exclusion are two different server-side restrictions. Support is willing to fix the first but not the second (or didn't understand the second). Plan pivot:
+1. Force profile write events (location/bio changes) to try to trigger an automatic search plan rebuild on the backend
+2. Hit unencrypted endpoints (`post_recommend_btn`, `free_recommend_status`) directly from iPhone via an iOS HTTP client app — the auth token in `probe-commands.sh` is still valid until 2026-05-02
+3. Open external pressure fronts since HelloTalk support has gone quiet: Apple App Store formal complaint, Trustpilot review, LinkedIn outreach to HT staff, Reddit post, Twitter tag
+4. Drop face verification as a recovery lever — permanently unreachable
+
+### Re-check needed
+- Re-run `monitor-visibility.py` to see current state of error 6000 (requires laptop with captures/)
+- Hit `free_recommend_status` from iPhone to see current boost inventory
+- Hit `post_recommend_btn` from iPhone to fire any available boost
+- Hit `query_expose_record` to read current visibility metrics
+
+---
+
 ## 2026-04-06 — MOBILE API ENCRYPTION FULLY CRACKED
 
 ### Encryption Scheme (Complete)

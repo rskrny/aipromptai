@@ -1,6 +1,6 @@
 # Current Status
 
-**Last updated**: 2026-04-06
+**Last updated**: 2026-04-11
 
 ## Account Profile
 - **User**: American learning Chinese (Mandarin)
@@ -12,36 +12,40 @@
 - **Location history**: Highly unstable — Europe (2023) → China → US, with VPN usage throughout
 - **Current location**: US (assumed)
 
-## Diagnosis — CONFIRMED (2026-04-06)
+## Diagnosis — UPDATED (2026-04-11)
 
-### ROOT CAUSE: Profile Lock + Search Index Exclusion
+### ROOT CAUSE: Search Index Exclusion (profile lock PARTIALLY CLEARED)
 
-**CONFIRMED via API:** The `go_user_search/v2/filter` endpoint returns error code 6000: `"Get Search User Plan Failed"` for this account. The search service REFUSES to create a discovery index entry. This is not a ranking issue — the account is completely excluded from the search index.
+**STATE AS OF 2026-04-11:**
+- Profile lock LIFTED — user reports they can now edit profile fields. "System maintenance" message is gone. No warnings. Likely cleared by HelloTalk support in response to our 2026-04-06 unlock email.
+- Visibility STILL BROKEN — user still gets zero inbound traffic from strangers. Moments get ~10 likes each (likely from existing 1,070 followers via follow graph), but no profile views, no new stranger DMs. This strongly suggests the search index exclusion is still active.
+- Face verification PERMANENTLY LOCKED OUT — user cannot redo face verification because they did it once in China 2 years ago. App blocks re-verification. `is_real_auth: false` + `verify_status: 2` is stuck; the 4000 ranking points from `real_avatar` are unreachable through normal means.
+- Privacy settings confirmed correct: Who Can Find Me = Everyone, Languages = Native English / Learning Chinese, hobbies filled, photo is clear face.
 
-**CONFIRMED via app:** HelloTalk assistant bot displays message: "Due to system maintenance, you cannot modify your profile. All other functions won't be affected." This is a profile lock disguised as maintenance.
+**HISTORICAL (2026-04-06) — still valid technical state on server unless we re-check:**
+- `go_user_search/v2/filter` returned error code 6000 `"Get Search User Plan Failed"` — search service refused to index this account
+- Discovery scan of 491 users: account 98755150 absent from every page
+- Location data corrupted — `choose_place` returned random countries (China, Vietnam, Morocco, Nigeria)
+- Free tier, no VIP, `expose_feature_used: false`
 
-**CONFIRMED via API scan:** Scanned all 33 pages (491 users) of discovery results. Account 98755150 does NOT appear on any page. Every visible user has rank_score 5,000-33,999. This account is not ranked low — it is excluded entirely.
-
-**Contributing factors:**
-1. Profile is LOCKED — "system maintenance" message blocks all modifications
-2. Location data CORRUPTED — choose_place endpoint returns random countries (China, Vietnam, Morocco, Nigeria) due to VPN/country-hopping history
-3. `is_real_auth: false` — face verification not recognized despite being done 2 years ago in China
-4. `verify_status: 2` — unknown verification state
-5. `expose_feature_used: false` — never used exposure boosts despite 61 moments
-6. Free tier, no VIP
+### Current hypothesis (2026-04-11)
+The profile lock and the search plan exclusion are separate server-side restrictions. Support cleared the lock but not the exclusion. The exclusion may be self-healing (rebuilt on next profile write event) or may need a second support push. Plan: force profile write events to trigger rebuild, hit unencrypted `post_recommend_btn` to inject into recommend feeds, and open external-pressure fronts (App Store complaint, Trustpilot, LinkedIn to staff).
 
 ## What We Know For Sure
 - [x] Free account, not VIP (vip_stat=1, vip_type=0, current_vip_level="Normal")
-- [x] Profile is LOCKED by "system maintenance" — cannot modify profile
-- [x] Search plan error 6000 — completely excluded from discovery index
-- [x] Location data corrupted — choose_place returns random countries
-- [x] is_real_auth: false, verify_status: 2
+- [x] **PROFILE LOCK LIFTED (2026-04-11)** — user can edit profile, no warning messages, likely cleared by support in response to 2026-04-06 email
+- [x] Search plan error 6000 confirmed as of 2026-04-06 — needs re-check to see if still active
+- [x] Visibility still broken as of 2026-04-11 — zero stranger DMs, moments get ~10 likes (likely follow-graph, not discovery)
+- [x] Face verification PERMANENTLY BLOCKED — app refuses to let user re-verify; stuck with stale record from China
+- [x] Location data corrupted — choose_place returned random countries (2026-04-06)
+- [x] is_real_auth: false, verify_status: 2 (2026-04-06)
 - [x] Moments still distribute normally — visitors come from moments feed
 - [x] 1,070 followers, 173 following, 146 mutual
-- [x] 62 moments posted, exposing_count: 0
+- [x] 62+ moments posted, exposing_count: 0
 - [x] Nearby tab works (shows 491 users in Hana, Hawaii)
 - [x] Messaging works normally
 - [x] No warnings or suspensions ever received
+- [x] Auth token in `scripts/probe-commands.sh` valid until 2026-05-02 — can hit unencrypted endpoints from any device
 
 ## Confirmed Settings (from screenshot 2026-04-05)
 - **Location**: Hana, United States (Maui, Hawaii)
