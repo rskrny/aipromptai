@@ -27,7 +27,7 @@ permissions:
 
 concurrency:
   group: ht-monitor
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   probe:

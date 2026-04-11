@@ -41,18 +41,24 @@ The profile lock and the search plan exclusion are separate server-side restrict
 ## What We Know For Sure
 - [x] Free account, not VIP (vip_stat=1, vip_type=0, current_vip_level="Normal")
 - [x] **PROFILE LOCK LIFTED (2026-04-11)** — user can edit profile, no warning messages, likely cleared by support in response to 2026-04-06 email
-- [x] Search plan error 6000 confirmed as of 2026-04-06 — needs re-check to see if still active
-- [x] Visibility still broken as of 2026-04-11 — zero stranger DMs, moments get ~10 likes (likely follow-graph, not discovery)
+- [x] **BIO REWRITTEN (2026-04-11)** — user removed "赚钱" (make money) keyword from the Chinese self-introduction. Replaced with pure language-learning intent text. This removes the likely commercial-intent moderation trigger that may be what got the account swept into a suppression bucket in early 2023 when HelloTalk updated their content policy scanner.
+- [x] **SUPPORT FOLLOW-UP EMAIL SENT (2026-04-11)** — second email to support@hellotalk.com requesting escalation to senior trust & safety engineer and explicit re-indexing of account. Mentions preparing App Store complaint as stated consequence. Does not mention bio change (to avoid admitting fault for pre-existing content).
+- [x] Search plan error 6000 "Get Search User Plan Failed" (2026-04-06) has since advanced to error 4000 "Get Params Failed" on filter endpoint, and error 6000 "user flow up failed" on recommend endpoint (2026-04-11) — different errors at later pipeline stages, suggesting partial rebuild in progress
+- [x] Visibility still symptomatically broken as of 2026-04-11 — zero stranger DMs, moments get ~10 likes (likely follow-graph, not discovery). 1 profile view on 2026-04-11 evening but attributed to reciprocal action from a liked photo, not discovery pickup.
 - [x] Face verification PERMANENTLY BLOCKED — app refuses to let user re-verify; stuck with stale record from China
-- [x] Location data corrupted — choose_place returned random countries (2026-04-06)
-- [x] is_real_auth: false, verify_status: 2 (2026-04-06)
+- [x] Location data CORRUPTED on 2026-04-06 (choose_place returned random countries), RESOLVED by 2026-04-11 (nearby_count returns clean United States/Hana)
+- [x] Ghost lang 13 (is_temp: 1) still present on get_user_langs as of 2026-04-11. Not visible in app UI.
+- [x] is_real_auth: false, verify_status: 2 (2026-04-06, not re-checked yet)
 - [x] Moments still distribute normally — visitors come from moments feed
 - [x] 1,070 followers, 173 following, 146 mutual
 - [x] 62+ moments posted, exposing_count: 0
-- [x] Nearby tab works (shows 491 users in Hana, Hawaii)
+- [x] Nearby tab works (shows 491-493 users in Hana, Hawaii)
 - [x] Messaging works normally
 - [x] No warnings or suspensions ever received
+- [x] Profile location: Boston, United States
+- [x] HelloTalk ID: @slamjacket
 - [x] Auth token in `scripts/probe-commands.sh` valid until 2026-05-02 — can hit unencrypted endpoints from any device
+- [x] GitHub Actions monitoring (ht-monitor workflow) operational as of 2026-04-11, runs on push to probe scripts, hits plain + encrypted API probes + endpoint discovery sweep + public page fetch, commits results to monitor/ and docs/research/
 
 ## Confirmed Settings (from screenshot 2026-04-05)
 - **Location**: Hana, United States (Maui, Hawaii)
