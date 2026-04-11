@@ -18,6 +18,7 @@ on:
     paths:
       - 'scripts/monitor-probe.sh'
       - 'scripts/monitor-probe-encrypted.py'
+      - 'scripts/monitor-endpoint-sweep.py'
       - 'scripts/fetch-public-pages.sh'
       - '.github/workflows/ht-monitor.yml'
 
@@ -55,6 +56,9 @@ jobs:
       - name: Run encrypted API probes
         run: python3 scripts/monitor-probe-encrypted.py
 
+      - name: Run endpoint discovery sweep
+        run: python3 scripts/monitor-endpoint-sweep.py
+
       - name: Fetch public HelloTalk pages
         run: |
           chmod +x scripts/fetch-public-pages.sh
@@ -64,7 +68,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add monitor/
+          git add monitor/ docs/research/
           if git diff --cached --quiet; then
             echo "No probe changes to commit."
             exit 0
