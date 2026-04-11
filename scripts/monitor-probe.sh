@@ -24,7 +24,9 @@
 set -uo pipefail
 
 TOKEN="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzgwMzA1NzAsInNyYyI6MiwidWlkIjo5ODc1NTE1MH0.Og3Hb2l95RB7SPuw5TRR5Q_rJsnSb1ClqMaCP-Abqh8"
-UID="98755150"
+# NB: $UID is readonly in bash (the OS uid). Use HT_UID for the HelloTalk
+# user id so we don't accidentally send the runner's OS uid in x-ht-uid.
+HT_UID="98755150"
 DID="29ea6362a590de52972d100cd01ab78dd7b7b6c9"
 BASE="https://api-global.hellotalk8.com"
 
@@ -35,13 +37,13 @@ mkdir -p "$RUN_DIR"
 
 HEADER_ARGS=(
   -H "Authorization: $TOKEN"
-  -H "x-ht-uid: $UID"
+  -H "x-ht-uid: $HT_UID"
   -H "x-ht-did: $DID"
   -H "x-ht-os: ios"
   -H "x-ht-timezone: -10.00"
   -H "Content-Type: application/json"
   -H "Accept: application/json"
-  -H "User-Agent: ios;6.3.0;iPhone14,3;26.4;$UID"
+  -H "User-Agent: ios;6.3.0;iPhone14,3;26.4;$HT_UID"
   -H "Accept-Language: en-US;q=1.0"
 )
 
@@ -157,7 +159,7 @@ probe "user_info_v4" POST \
   echo "# HelloTalk API Monitor Summary"
   echo ""
   echo "Run timestamp: $TIMESTAMP"
-  echo "User ID:       $UID"
+  echo "User ID:       $HT_UID"
   echo ""
   echo "## Probe results"
   echo ""

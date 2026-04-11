@@ -17,6 +17,7 @@ on:
       - claude/project-status-review-upavM
     paths:
       - 'scripts/monitor-probe.sh'
+      - 'scripts/monitor-probe-encrypted.py'
       - '.github/workflows/ht-monitor.yml'
 
 permissions:
@@ -37,10 +38,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run API probes
+      - name: Run plain API probes
         run: |
           chmod +x scripts/monitor-probe.sh
           bash scripts/monitor-probe.sh
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps for encrypted probes
+        run: pip install --quiet httpx cryptography
+
+      - name: Run encrypted API probes
+        run: python3 scripts/monitor-probe-encrypted.py
 
       - name: Commit results
         run: |
