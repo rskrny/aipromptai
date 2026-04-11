@@ -41,9 +41,10 @@ jobs:
           fetch-depth: 0
 
       - name: Run plain API probes
+        continue-on-error: true
         run: |
           chmod +x scripts/monitor-probe.sh
-          bash scripts/monitor-probe.sh
+          bash scripts/monitor-probe.sh || echo "plain probe step failed (continuing)"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -54,27 +55,51 @@ jobs:
         run: pip install --quiet httpx cryptography
 
       - name: Run encrypted API probes
-        run: python3 scripts/monitor-probe-encrypted.py
+        continue-on-error: true
+        run: python3 scripts/monitor-probe-encrypted.py || echo "encrypted probe step failed (continuing)"
 
       - name: Run endpoint discovery sweep
-        run: python3 scripts/monitor-endpoint-sweep.py
+        continue-on-error: true
+        run: python3 scripts/monitor-endpoint-sweep.py || echo "sweep step failed (continuing)"
 
       - name: Fetch public HelloTalk pages
+        continue-on-error: true
         run: |
           chmod +x scripts/fetch-public-pages.sh
-          bash scripts/fetch-public-pages.sh
+          bash scripts/fetch-public-pages.sh || echo "fetch step failed (continuing)"
+
+      - name: Write workflow heartbeat
+        if: always()
+        run: |
+          mkdir -p monitor/latest
+          {
+            echo "run_id=${{ github.run_id }}"
+            echo "run_number=${{ github.run_number }}"
+            echo "commit=${{ github.sha }}"
+            echo "timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "ref=${{ github.ref_name }}"
+          } > monitor/latest/_workflow_heartbeat.log
+          echo "=== monitor/latest contents ==="
+          ls -la monitor/latest/ 2>&1 || true
+          echo "=== docs/research contents ==="
+          ls -la docs/research/ 2>&1 || true
+          echo "=== monitor/runs contents ==="
+          ls -la monitor/runs/ 2>&1 || true
 
       - name: Commit results
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add monitor/ docs/research/
+          # Defensive git add: each path is independent. Missing paths are OK.
+          git add monitor/ 2>&1 || true
+          git add docs/research/ 2>&1 || true
+          git status --short
           if git diff --cached --quiet; then
-            echo "No probe changes to commit."
+            echo "No changes to commit."
             exit 0
           fi
-          git commit -m "monitor: probe run $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          # Rebase on any parallel commits to avoid push conflicts
+          git commit -m "monitor: run ${{ github.run_number }} $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
 
@@ -82,6 +107,10 @@ jobs:
         if: always()
         run: |
           if [[ -f monitor/latest/_summary.txt ]]; then
-            echo "=== Latest summary ==="
+            echo "=== latest plain probe summary ==="
             cat monitor/latest/_summary.txt
+          fi
+          if [[ -f monitor/latest/sweep_summary.txt ]]; then
+            echo "=== latest sweep summary ==="
+            cat monitor/latest/sweep_summary.txt
           fi

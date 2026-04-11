@@ -71,8 +71,8 @@ SERVER_PUB_HEX = (
 )
 SERVER_PUB_BYTES = bytes.fromhex(SERVER_PUB_HEX)
 
-# Per-request inter-delay
-DELAY_RANGE = (2.0, 4.0)
+# Per-request inter-delay (tightened to keep the full sweep under ~3 min)
+DELAY_RANGE = (1.0, 2.0)
 
 # Fail-safe: stop immediately if any request returns 429
 RATE_LIMIT_ABORT = True
