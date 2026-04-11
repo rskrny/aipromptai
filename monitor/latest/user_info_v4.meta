@@ -1,0 +1,6 @@
+name=user_info_v4
+method=POST
+url=https://api-global.hellotalk8.com/v4/user/info
+http_code=404
+size=0
+request_body={"user_id":98755150}

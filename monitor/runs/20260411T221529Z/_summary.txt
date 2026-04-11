@@ -1,0 +1,19 @@
+# HelloTalk API Monitor Summary
+
+Run timestamp: 20260411T221529Z
+User ID:       1001
+
+## Probe results
+
+  boost_product_list                   200  41 bytes
+  boost_status_type14                  200  73 bytes
+  boost_status_type6                   200  72 bytes
+  moment_expose_record                 400  57 bytes
+  moment_tab_info                      400  57 bytes
+  moments_latest                       400  57 bytes
+  search_filter                        400  57 bytes
+  search_nearby_count                  400  57 bytes
+  search_recommend                     400  57 bytes
+  user_detail_v4                       404  0 bytes
+  user_info_v4                         404  0 bytes
+  user_langs                           200  149 bytes

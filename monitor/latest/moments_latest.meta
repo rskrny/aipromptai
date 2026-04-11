@@ -1,0 +1,6 @@
+name=moments_latest
+method=POST
+url=https://api-global.hellotalk8.com/v2/moment/latest
+http_code=400
+size=57
+request_body={"user_id":98755150,"page":1,"count":5}
