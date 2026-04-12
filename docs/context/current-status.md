@@ -1,6 +1,6 @@
 # Current Status
 
-**Last updated**: 2026-04-11
+**Last updated**: 2026-04-12
 
 ## Account Profile
 - **User**: American learning Chinese (Mandarin)
@@ -125,10 +125,11 @@ Two-pronged: unlock old account + optimize new account. See details below.
 ## Immediate Next Steps
 
 ### OLD ACCOUNT (98755150)
-1. **EMAIL SENT** to support@hellotalk.com demanding profile unlock and discovery restoration
-2. **Keep posting moments** — moments feed still distributes content, drives visitors
-3. **Monitor** search plan status via API (error 6000 check) — auto-detect when/if lock lifts
-4. If lock lifts: immediately optimize rank_score using known formula
+1. **WORKFLOW TRIGGERED (2026-04-12)** — pushed ghost lang 13 deletion probes + expanded encrypted diagnostics. Waiting for GitHub Actions results.
+2. **Ghost lang 13 deletion** — 6 candidate API endpoints being tested by the workflow. If none work unencrypted, try via encrypted client after cooldown expires (2026-04-13 14:46:55).
+3. **Decompiled APK search** — user has laptop access, can search `/c/tmp/jadx-output/` for the actual lang deletion Retrofit endpoint used by the app.
+4. **Monitor** filter/recommend endpoints for progression from error 4000/6000 → 0
+5. **Keep posting moments** — moments feed still distributes content, drives visitors
 
 ### NEW ACCOUNT (username: u_sam749, email: Ryan@brandpal.ai)
 1. **GET THE USER ID** — needed to monitor via API. Options:

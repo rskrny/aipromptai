@@ -4,6 +4,51 @@ Chronological log of every research finding. Newest entries at the top.
 
 ---
 
+## 2026-04-12 — PHASE 2 LAUNCH: ghost lang 13 deletion + expanded diagnostics
+
+### Context
+24 hours since the bio rewrite + support email. User has laptop access again. The 2026-04-11 monitor run showed:
+- `filter`: error 4000 "Get Params Failed" (unchanged from 2026-04-11)
+- `recommend`: error 6000 "user flow up failed" (unchanged)
+- `user_langs`: ghost lang 13 (is_temp=1) still present
+- `nearby_count`: clean, 493 users, United States/Hana
+
+The bio rewrite hasn't visibly changed the API error codes yet, but it's only been ~24 hours. The support email may not have been actioned yet either. Baseline measurement: user confirmed 0 new stranger DMs as of 2026-04-12.
+
+### Actions taken (2026-04-12)
+1. **Added 6 ghost lang 13 deletion probes to monitor-probe.sh**:
+   - `clear_temp_lang` — generic temp-lang cleanup
+   - `remove_lang` — remove by lang ID + is_temp flag
+   - `delete_lang` — delete by lang_id
+   - `set_user_langs` — overwrite lang list with only lang 2 (Chinese)
+   - `v2/user/lang/delete` — v2 API variant
+   - `v2/user/lang/set` — v2 API variant, set to only Chinese
+
+   These are candidate endpoints from the decompiled APK patterns. We don't know which ones exist on the server yet. The workflow run will tell us.
+
+2. **Added `post_recommend_btn` probe** — attempts to inject the user into the recommend feed via the virtual product system. Previously confirmed as returning HTTP 200.
+
+3. **Added 7 encrypted probes to monitor-probe-encrypted.py**:
+   - `account/restrict` — may reveal active suppression flags
+   - `user/trust_score` — may show trust level affecting ranking
+   - `user/visibility` — may show visibility state
+   - `v4/user/profile` + `v4/user/info` — profile data including rank_score, beauty_score, is_real_auth
+   - `go_user_search/v2/get_user_detail` + `user_card` — how the search service sees our profile
+
+4. **Fixed timezone** in both scripts from -10.00 (Hawaii) to -4.00 (Eastern/Boston)
+
+5. **Pushed to trigger GitHub Actions workflow run** — commit c46c69a
+
+### What we expect from the workflow run
+- The lang deletion endpoints will either: (a) return 404 (don't exist), (b) return an error with diagnostic info, or (c) actually clear the ghost lang. Any of (a)-(c) gives us useful data.
+- The encrypted profile/trust/visibility probes may reveal the actual suppression mechanism — whether there's an explicit flag on the account vs. the search plan simply being incomplete.
+- The filter/recommend re-check will show if the bio rewrite caused any further progression in the error codes.
+
+### Language change cooldown
+The app-level language change cooldown expires 2026-04-13 14:46:55. However, the ghost lang 13 has `is_temp: 1`, which marks it as a trial/temporary language. Temporary languages may have separate lifecycle management from the primary learning language and may not be subject to the same cooldown. This is what we're testing with today's probes.
+
+---
+
 ## 2026-04-11 — MILESTONES: bio rewritten + support email sent
 
 Two key actions fired within an hour of each other, both of which are expected to accelerate the stalled backend rebuild:
