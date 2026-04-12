@@ -84,7 +84,7 @@ Either way, the updated bio is now live and the moderation scanner's next cycle 
 
 - [ ] Confirmation that the bio edit actually saved on the server (can check by viewing own profile after save)
 - [ ] 24-72 hour observation window to see if inbound / match volume responds
-- [ ] Current count of strangers viewing profile / sending first messages (baseline measurement)
+- [x] Baseline measurement 2026-04-12: **0 recent stranger DMs** (user confirmed only old DMs from "very long ago" exist, no recent inbound)
 - [ ] Whether Tandem's "Super Likes" / boost system has any free inventory on this account
 - [ ] Research into Tandem's discovery algorithm and known moderation patterns
 
