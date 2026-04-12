@@ -148,7 +148,7 @@ def main() -> int:
         "x-ht-uid": HT_UID,
         "x-ht-did": DID,
         "x-ht-os": "ios",
-        "x-ht-timezone": "-10.00",
+        "x-ht-timezone": "-4.00",
         "User-Agent": f"ios;6.3.0;iPhone14,3;26.4;{HT_UID}",
         "Accept": "*/*",
         "x-ht-pub": x_ht_pub,
@@ -177,6 +177,23 @@ def main() -> int:
          None, {"user_id": int(HT_UID), "page": 1, "count": 5}),
         # Moment tab info (visibility / engagement metadata)
         ("enc_moment_tab_info", "POST", "/go_moment/v2/get_moment_tab_info",
+         None, {"user_id": int(HT_UID)}),
+        # Account restriction / trust state (encrypted — may reveal suppression flags)
+        ("enc_account_restrict", "POST", "/v2/account/restrict",
+         None, {"user_id": int(HT_UID)}),
+        ("enc_trust_score", "POST", "/v2/user/trust_score",
+         None, {"user_id": int(HT_UID)}),
+        ("enc_visibility", "POST", "/v2/user/visibility",
+         None, {"user_id": int(HT_UID)}),
+        # Profile fetch — check rank_score, beauty_score, real_avatar status
+        ("enc_profile", "POST", "/v4/user/profile",
+         None, {"user_id": int(HT_UID)}),
+        ("enc_user_info", "POST", "/v4/user/info",
+         None, {"user_id": int(HT_UID)}),
+        # User detail from search service — reveals how ranking sees us
+        ("enc_user_detail", "POST", "/go_user_search/v2/get_user_detail",
+         None, {"user_id": int(HT_UID)}),
+        ("enc_user_card", "POST", "/go_user_search/v2/user_card",
          None, {"user_id": int(HT_UID)}),
     ]
 

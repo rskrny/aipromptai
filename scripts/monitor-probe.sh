@@ -40,7 +40,7 @@ HEADER_ARGS=(
   -H "x-ht-uid: $HT_UID"
   -H "x-ht-did: $DID"
   -H "x-ht-os: ios"
-  -H "x-ht-timezone: -10.00"
+  -H "x-ht-timezone: -4.00"
   -H "Content-Type: application/json"
   -H "Accept: application/json"
   -H "User-Agent: ios;6.3.0;iPhone14,3;26.4;$HT_UID"
@@ -151,6 +151,45 @@ probe "user_detail_v4" POST \
 probe "user_info_v4" POST \
   "$BASE/v4/user/info" \
   '{"user_id":98755150}'
+
+# ---------------------------------------------------------------------------
+# Ghost lang 13 cleanup — try every candidate deletion endpoint
+#
+# The account has a phantom temporary language (lang 13, is_temp=1) that is
+# invisible in the app UI and may be blocking search indexing. Try to clear it.
+# These are write-intent probes. The worst case is error responses (diagnostic
+# data). We try multiple endpoints because we don't know which one the app uses.
+# ---------------------------------------------------------------------------
+probe "lang_clear_temp" POST \
+  "$BASE/go_user_search/v1/go_user_info/clear_temp_lang" \
+  "{\"user_id\":$HT_UID}"
+
+probe "lang_remove" POST \
+  "$BASE/go_user_search/v1/go_user_info/remove_lang" \
+  "{\"user_id\":$HT_UID,\"lang\":13,\"is_temp\":1}"
+
+probe "lang_delete" POST \
+  "$BASE/go_user_search/v1/go_user_info/delete_lang" \
+  "{\"user_id\":$HT_UID,\"lang_id\":13}"
+
+probe "lang_set_correct" POST \
+  "$BASE/go_user_search/v1/go_user_info/set_user_langs" \
+  "{\"user_id\":$HT_UID,\"langs\":[{\"lang\":2,\"is_temp\":0}]}"
+
+probe "lang_update_v2" POST \
+  "$BASE/v2/user/lang/delete" \
+  "{\"user_id\":$HT_UID,\"lang_id\":13}"
+
+probe "lang_set_v2" POST \
+  "$BASE/v2/user/lang/set" \
+  "{\"user_id\":$HT_UID,\"langs\":[{\"lang_id\":2}]}"
+
+# ---------------------------------------------------------------------------
+# Force profile refresh — hit endpoints that may trigger a re-index
+# ---------------------------------------------------------------------------
+probe "recommend_btn" POST \
+  "$BASE/virtual_product/v1/recommend/post_recommend_btn" \
+  "{\"os_version\":\"26.4\",\"nationality\":\"US\",\"lang_id\":1,\"native_lang\":1,\"os_type\":0,\"user_id\":$HT_UID,\"app_version\":\"6.3.0\"}"
 
 # ---------------------------------------------------------------------------
 # Summary + stable latest/ copy
