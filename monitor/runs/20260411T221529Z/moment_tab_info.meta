@@ -1,0 +1,6 @@
+name=moment_tab_info
+method=POST
+url=https://api-global.hellotalk8.com/go_moment/v2/get_moment_tab_info
+http_code=400
+size=57
+request_body={"user_id":98755150}

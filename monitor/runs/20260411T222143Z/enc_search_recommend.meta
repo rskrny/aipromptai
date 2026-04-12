@@ -1,0 +1,7 @@
+name=enc_search_recommend
+method=GET
+path=/go_user_search/v2/recommend
+http_code=200
+content_length=80
+content_type=ht/encbin
+parse_kind=decrypted_json

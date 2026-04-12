@@ -1,0 +1,5 @@
+name=search_recommend
+method=GET
+url=https://api-global.hellotalk8.com/go_user_search/v2/recommend?userid=98755150&learnlang=2&page=1
+http_code=400
+size=57

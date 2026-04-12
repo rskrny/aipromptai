@@ -1,0 +1,5 @@
+name=user_langs
+method=GET
+url=https://api-global.hellotalk8.com/go_user_search/v1/go_user_info/get_user_langs?user_id=98755150
+http_code=200
+size=149

@@ -1,0 +1,5 @@
+name=search_nearby_count
+method=GET
+url=https://api-global.hellotalk8.com/go_user_search/v2/nearby_count?latitude=20.7564&longitude=-155.9900&learnlang=2&page=1&sort=distance&userid=98755150
+http_code=400
+size=57

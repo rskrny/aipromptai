@@ -80,3 +80,22 @@ Record of every decision made and the reasoning behind it.
 
 **Decision**: Need new account's user ID before we can monitor/optimize it.
 **Reasoning**: The HelloTalk app doesn't display the numeric user ID in an obvious place. Need to capture it via Proxyman/mitmproxy traffic interception from the second phone's HelloTalk requests. This is the blocker for next session.
+
+---
+
+## 2026-04-11 — Go Offensive: Three-Front Attack Plan
+
+**Decision**: Stop waiting on HelloTalk support. Pivot to a three-front offensive campaign.
+**Reasoning**: Support responded to the 2026-04-06 email by clearing the profile lock but did NOT clear the search plan exclusion. The account is editable now but still invisible. Support has gone quiet again. Continuing to wait is pointless. We have enough technical capability and external pressure options to push multiple angles in parallel.
+
+**Decision**: Drop face verification as a recovery lever permanently.
+**Reasoning**: HelloTalk only allows face verification ONCE per account. User did it in China 2 years ago. App blocks re-verification. The 4000-point `real_avatar` factor is unreachable through normal means. Further investigation of this path is wasted time.
+
+**Decision**: Use the iPhone as the primary execution environment (not a laptop).
+**Reasoning**: User is mobile-only right now and wants to act today. The auth token in `probe-commands.sh` is valid until 2026-05-02. Unencrypted endpoints (`free_recommend_status`, `post_recommend_btn`, `query_expose_record`, `get_user_info`, `get_user_detail`) can be hit from any iOS HTTP client app (Postman / HTTPBot / Apidog) using plain HTTP. This unlocks direct API action without waiting for laptop access.
+
+**Decision**: Force profile write events as a hypothesis test for search plan rebuild.
+**Reasoning**: The search plan rebuild likely happens on profile write events on the backend. The profile was locked for years, which means no writes have been firing, which means the indexer has never been prompted to retry. Now that the lock is off, changing city/bio/location should trigger the rebuild. This is zero-risk and zero-cost to test.
+
+**Decision**: Open external pressure fronts in parallel with technical action.
+**Reasoning**: HelloTalk is a Chinese company and doesn't care about individual user complaints. But they care about: Apple (App Store deceptive-purchase complaints can trigger developer account review), public reputation (Trustpilot/Reddit rank in Google), and being publicly called out on Twitter. These channels escalate what a single support email never will. Recommended actions: Apple "Report a Problem" for deceptive in-app purchases (selling boosts to a secretly-excluded account), Trustpilot 1-star review, Reddit post in r/languagelearning and r/ChineseLanguage describing the symptoms and asking if others are affected, LinkedIn DMs to 2–3 HelloTalk staff (PM / Trust & Safety / Community).

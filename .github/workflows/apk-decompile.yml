@@ -1,0 +1,60 @@
+name: HelloTalk APK decompile
+
+# One-shot intelligence gathering. Downloads the current HelloTalk APK
+# and runs JADX to extract all Retrofit HTTP annotations and hardcoded
+# URL strings. Writes results to docs/research/apk-*.txt and commits
+# them to the branch. Fires on push when the script itself changes
+# (so committing a new version of apk-decompile.sh will re-run it).
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/project-status-review-upavM
+    paths:
+      - 'scripts/apk-decompile.sh'
+      - '.github/workflows/apk-decompile.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk-decompile
+  cancel-in-progress: false
+
+jobs:
+  decompile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install JADX
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq jadx unzip || {
+            echo "apt jadx install failed, will fall back to release JAR in the script"
+          }
+
+      - name: Run APK decompile
+        continue-on-error: true
+        run: |
+          chmod +x scripts/apk-decompile.sh
+          bash scripts/apk-decompile.sh
+
+      - name: Commit results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/research/
+          if git diff --cached --quiet; then
+            echo "No new APK output to commit"
+            exit 0
+          fi
+          git commit -m "apk: decompile output $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

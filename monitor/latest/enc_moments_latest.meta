@@ -1,0 +1,7 @@
+name=enc_moments_latest
+method=POST
+path=/v2/moment/latest
+http_code=400
+content_length=31
+content_type=application/json
+parse_kind=plain

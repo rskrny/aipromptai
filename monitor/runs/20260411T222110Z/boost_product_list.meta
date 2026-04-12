@@ -1,0 +1,6 @@
+name=boost_product_list
+method=POST
+url=https://api-global.hellotalk8.com/virtual_product/v1/virtual_product/list
+http_code=200
+size=41
+request_body={"os_version":"26.4","nationality":"US","lang_id":1,"native_lang":1,"os_type":0,"user_id":98755150,"app_version":"6.3.0"}
